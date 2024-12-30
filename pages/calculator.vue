@@ -50,12 +50,13 @@
             <el-row>
                 <el-col :span="12">
                     <el-form-item label="預計退休">
-                        <el-input-number v-model="retirement.age" :min="0" :max="70" :step="5" />
+                        <el-input-number v-model="retirement.age" :min="50" :max="70" :step="5" />
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="退休後餘命">
-                        <el-input-number v-model="retirement.lifeExpectancy" :min="0" :max="120" :step="5" />
+                        <el-input-number v-model="retirement.lifeExpectancy" :min="0" :max="120" :step="5"
+                            @change="onReqirementChanged()" />
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -86,17 +87,25 @@
                 </el-table-column>
                 <el-table-column prop="startDate" label="開始年">
                     <template #default="scope">
-                        <el-date-picker v-model="scope.row.startDate" type="year" />
+                        <el-date-picker v-model="scope.row.startDate" type="year"
+                            :disabled="['理財收入', '退休後收入'].includes(scope.row.name)" />
                     </template>
                 </el-table-column>
                 <el-table-column prop="pmt" label="現金流">
-
+                    <template #default="scope">
+                        <el-input-number v-model="scope.row.pmt"></el-input-number>
+                    </template>
                 </el-table-column>
                 <el-table-column prop="n" label="為期n年">
-
+                    <template #default="scope">
+                        <el-input-number v-model="scope.row.n"
+                            :disabled="['理財收入', '退休後收入'].includes(scope.row.name)"></el-input-number>
+                    </template>
                 </el-table-column>
                 <el-table-column prop="yield" label="現金流增長率">
-
+                    <template #default="scope">
+                        <el-input-number v-model="scope.row.yield"></el-input-number>
+                    </template>
                 </el-table-column>
             </el-table>
         </el-card>
@@ -181,11 +190,26 @@ function onProfileChanged() {
     }
 }
 
+function onReqirementChanged() {
+    const retirementIncome = financeGoals.value.find(item => {
+        return item.name === '退休後收入'
+    })
+    if (retirementIncome) {
+        const date = new Date()
+        let currentYear = date.getFullYear()
+        currentYear += retirement.value.lifeExpectancy
+        date.setFullYear(currentYear)
+        retirementIncome.startDate = date.toISOString()
+        retirementIncome.n = retirement.value.lifeExpectancy
+    }
+}
+
 onMounted(() => {
     if (window.origin === 'http://localhost:3000') {
-        
+
     }
     onProfileChanged()
+    onReqirementChanged()
 })
 
 </script>
