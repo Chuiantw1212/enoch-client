@@ -88,7 +88,7 @@
                 <el-table-column prop="startDate" label="開始年">
                     <template #default="scope">
                         <el-date-picker v-model="scope.row.startDate" type="year"
-                            :disabled="['理財收入', '退休後收入'].includes(scope.row.name)" />
+                            :disabled="['理財收入', '退休後收入', '退休後支出'].includes(scope.row.name)" />
                     </template>
                 </el-table-column>
                 <el-table-column prop="pmt" label="現金流">
@@ -99,7 +99,7 @@
                 <el-table-column prop="n" label="為期n年">
                     <template #default="scope">
                         <el-input-number v-model="scope.row.n"
-                            :disabled="['理財收入', '退休後收入'].includes(scope.row.name)"></el-input-number>
+                            :disabled="['理財收入', '退休後收入', '退休後支出'].includes(scope.row.name)"></el-input-number>
                     </template>
                 </el-table-column>
                 <el-table-column prop="yield" label="現金流增長率">
@@ -156,9 +156,9 @@ const financeGoals = ref([
     },
     // 流出
     {
-        name: '退休支出',
+        name: '退休後支出',
         startDate: '',
-        pmt: 0,
+        pmt: -30000,
         n: 0,
         yield: 0,
     },
@@ -191,16 +191,25 @@ function onProfileChanged() {
 }
 
 function onReqirementChanged() {
+    const date = new Date()
+    let currentYear = date.getFullYear()
+    currentYear += retirement.value.lifeExpectancy
+    date.setFullYear(currentYear)
+
     const retirementIncome = financeGoals.value.find(item => {
         return item.name === '退休後收入'
     })
     if (retirementIncome) {
-        const date = new Date()
-        let currentYear = date.getFullYear()
-        currentYear += retirement.value.lifeExpectancy
-        date.setFullYear(currentYear)
         retirementIncome.startDate = date.toISOString()
         retirementIncome.n = retirement.value.lifeExpectancy
+    }
+
+    const retirementExpense = financeGoals.value.find(item => {
+        return item.name === '退休後支出'
+    })
+    if (retirementExpense) {
+        retirementExpense.startDate = date.toISOString()
+        retirementExpense.n = retirement.value.lifeExpectancy
     }
 }
 
