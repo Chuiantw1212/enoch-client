@@ -10,7 +10,8 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="目前年齡">
-                            <el-input-number v-model="profile.age" :min="0" :max="120" :step="5" />
+                            <el-input-number v-model="profile.age" :min="0" :max="120" :step="5"
+                                @change="onProfileChanged()" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -67,7 +68,7 @@
             <el-row>
                 <el-col :span="12">
                     <el-form-item label="現有資產">
-                        <el-input-number v-model="security.presentValue" :min="0" :step="100000"/>
+                        <el-input-number v-model="security.presentValue" :min="0" :step="100000" />
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
@@ -133,8 +134,7 @@ const financeGoals = ref([
     {
         name: '理財收入',
         startDate: new Date().toISOString(),
-        endDate: '',
-        pmt: 0,
+        pmt: 2000,
         n: 0,
         yield: 0,
     },
@@ -149,7 +149,6 @@ const financeGoals = ref([
     {
         name: '退休支出',
         startDate: '',
-        endDate: '',
         pmt: 0,
         n: 0,
         yield: 0,
@@ -157,7 +156,6 @@ const financeGoals = ref([
     {
         name: '購房首付',
         startDate: '',
-        endDate: '',
         pmt: 0,
         n: 0,
         yield: 0,
@@ -165,59 +163,29 @@ const financeGoals = ref([
     {
         name: '購房貸款',
         startDate: '',
-        endDate: '',
         pmt: 0,
         n: 0,
         yield: 0,
     },
 ])
 
+// methods
+function onProfileChanged() {
+    const financeIncome = financeGoals.value.find(item => {
+        return item.name === '理財收入'
+    })
+    if (financeIncome) {
+        const { age, lifeExpectancy } = retirement.value
+        const n = age + lifeExpectancy - profile.value.age
+        financeIncome.n = n
+    }
+}
+
 onMounted(() => {
     if (window.origin === 'http://localhost:3000') {
-        financeGoals.value = [
-            // 流入 
-            {
-                name: '理財收入',
-                startDate: new Date().toISOString(),
-                endDate: '',
-                pmt: 0,
-                n: 0,
-                yield: 0,
-            },
-            {
-                name: '退休後收入',
-                startDate: '',
-                pmt: 0,
-                n: 0,
-                yield: 0,
-            },
-            // 流出
-            {
-                name: '退休支出',
-                startDate: '',
-                endDate: '',
-                pmt: 0,
-                n: 0,
-                yield: 0,
-            },
-            {
-                name: '購房首付',
-                startDate: '',
-                endDate: '',
-                pmt: 0,
-                n: 0,
-                yield: 0,
-            },
-            {
-                name: '購房貸款',
-                startDate: '',
-                endDate: '',
-                pmt: 0,
-                n: 0,
-                yield: 0,
-            },
-        ]
+        
     }
+    onProfileChanged()
 })
 
 </script>
