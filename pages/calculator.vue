@@ -67,7 +67,7 @@
             <el-row>
                 <el-col :span="12">
                     <el-form-item label="現有資產">
-                        <el-input-number v-model="security.presentValue" :min="0" />
+                        <el-input-number v-model="security.presentValue" :min="0" :step="100000"/>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
@@ -80,38 +80,50 @@
 
         <el-card class="calculator__card calculator__card--100">
             <el-table :data="financeGoals" style="width: 100%">
-                <el-table-column prop="name" label="理財目標" />
-                <el-table-column prop="startDate" label="開始年" />
-                <el-table-column prop="pmt" label="現金流" />
-                <el-table-column prop="n" label="為期n年" />
-                <el-table-column prop="yield" label="現金流增長率" />
+                <el-table-column prop="name" label="理財目標">
+
+                </el-table-column>
+                <el-table-column prop="startDate" label="開始年">
+                    <template #default="scope">
+                        <el-date-picker v-model="scope.row.startDate" type="year" />
+                    </template>
+                </el-table-column>
+                <el-table-column prop="pmt" label="現金流">
+
+                </el-table-column>
+                <el-table-column prop="n" label="為期n年">
+
+                </el-table-column>
+                <el-table-column prop="yield" label="現金流增長率">
+
+                </el-table-column>
             </el-table>
         </el-card>
     </div>
 </template>
 <script lang="ts" setup>
 const config = ref({
-    riskFreeRate: 0,
+    riskFreeRate: 2,
 })
 
 const profile = ref({
-    age: 0,
+    age: 34,
 })
 
 const career = ref({
-    postTaxMonthlyIncome: 0,
-    growthRate: 0,
+    postTaxMonthlyIncome: 60000,
+    growthRate: 2,
 })
 
 const retirement = ref({
-    age: 0,
-    income: 0,
-    lifeExpectancy: 0,
+    age: 70,
+    income: 42000,
+    lifeExpectancy: 18,
 })
 
 const security = ref({
-    presentValue: 0,
-    presentIrr: 0,
+    presentValue: 6000000,
+    presentIrr: 5,
     expectedIrr: 0,
 })
 
@@ -120,16 +132,16 @@ const financeGoals = ref([
     // 流入 
     {
         name: '理財收入',
-        startDate: '',
+        startDate: new Date().toISOString(),
         endDate: '',
-        pmt: 25000,
+        pmt: 0,
         n: 0,
         yield: 0,
     },
     {
         name: '退休後收入',
         startDate: '',
-        pmt: 25000,
+        pmt: 0,
         n: 0,
         yield: 0,
     },
@@ -138,7 +150,7 @@ const financeGoals = ref([
         name: '退休支出',
         startDate: '',
         endDate: '',
-        pmt: 25000,
+        pmt: 0,
         n: 0,
         yield: 0,
     },
@@ -146,7 +158,7 @@ const financeGoals = ref([
         name: '購房首付',
         startDate: '',
         endDate: '',
-        pmt: 25000,
+        pmt: 0,
         n: 0,
         yield: 0,
     },
@@ -154,11 +166,59 @@ const financeGoals = ref([
         name: '購房貸款',
         startDate: '',
         endDate: '',
-        pmt: 25000,
+        pmt: 0,
         n: 0,
         yield: 0,
     },
 ])
+
+onMounted(() => {
+    if (window.origin === 'http://localhost:3000') {
+        financeGoals.value = [
+            // 流入 
+            {
+                name: '理財收入',
+                startDate: new Date().toISOString(),
+                endDate: '',
+                pmt: 0,
+                n: 0,
+                yield: 0,
+            },
+            {
+                name: '退休後收入',
+                startDate: '',
+                pmt: 0,
+                n: 0,
+                yield: 0,
+            },
+            // 流出
+            {
+                name: '退休支出',
+                startDate: '',
+                endDate: '',
+                pmt: 0,
+                n: 0,
+                yield: 0,
+            },
+            {
+                name: '購房首付',
+                startDate: '',
+                endDate: '',
+                pmt: 0,
+                n: 0,
+                yield: 0,
+            },
+            {
+                name: '購房貸款',
+                startDate: '',
+                endDate: '',
+                pmt: 0,
+                n: 0,
+                yield: 0,
+            },
+        ]
+    }
+})
 
 </script>
 <style lang="scss" scoped>
