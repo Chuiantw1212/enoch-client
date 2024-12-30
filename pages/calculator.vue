@@ -29,7 +29,7 @@
             </template>
             <el-form>
                 <el-row>
-                    <el-col :span="12">
+                    <!-- <el-col :span="12">
                         <el-form-item label="稅後收入">
                             <el-input-number v-model="career.postTaxMonthlyIncome" :min="0" :step="1000" />
                         </el-form-item>
@@ -38,7 +38,7 @@
                         <el-form-item label="增長率%">
                             <el-input-number v-model="career.growthRate" :min="0" :max="100" :step="0.1" />
                         </el-form-item>
-                    </el-col>
+                    </el-col> -->
                 </el-row>
             </el-form>
         </el-card>
@@ -213,12 +213,27 @@ function onReqirementChanged() {
     }
 }
 
+function onEstateChanged() {
+    const date = new Date()
+    let currentYear = date.getFullYear()
+    currentYear += 3
+    date.setFullYear(currentYear)
+
+    const estateMortgage = financeGoals.value.find(item => {
+        return item.name === '購房首付'
+    })
+    if (estateMortgage) {
+        
+    }
+}
+
 onMounted(() => {
     if (window.origin === 'http://localhost:3000') {
 
     }
     onProfileChanged()
     onReqirementChanged()
+    onEstateChanged()
 })
 
 </script>
