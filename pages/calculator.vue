@@ -2,7 +2,7 @@
     <h1>速算多目標理財規劃</h1>
 
     <div class="calculator">
-        <el-card>
+        <el-card class="calculator__card">
             <template #header>
                 基本資料
             </template>
@@ -22,7 +22,7 @@
             </el-form>
         </el-card>
 
-        <el-card>
+        <el-card class="calculator__card">
             <template #header>
                 職涯
             </template>
@@ -42,7 +42,7 @@
             </el-form>
         </el-card>
 
-        <el-card>
+        <el-card class="calculator__card">
             <template #header>
                 退休
             </template>
@@ -60,13 +60,13 @@
             </el-row>
         </el-card>
 
-        <el-card>
+        <el-card class="calculator__card">
             <template #header>
                 生息資產
             </template>
             <el-row>
                 <el-col :span="12">
-                    <el-form-item label="生息資產">
+                    <el-form-item label="現有資產">
                         <el-input-number v-model="security.presentValue" :min="0" />
                     </el-form-item>
                 </el-col>
@@ -76,6 +76,16 @@
                     </el-form-item>
                 </el-col>
             </el-row>
+        </el-card>
+
+        <el-card class="calculator__card calculator__card--100">
+            <el-table :data="financeGoals" style="width: 100%">
+                <el-table-column prop="name" label="理財目標" />
+                <el-table-column prop="startDate" label="開始年" />
+                <el-table-column prop="pmt" label="現金流" />
+                <el-table-column prop="n" label="為期n年" />
+                <el-table-column prop="yield" label="現金流增長率" />
+            </el-table>
         </el-card>
     </div>
 </template>
@@ -104,6 +114,52 @@ const security = ref({
     presentIrr: 0,
     expectedIrr: 0,
 })
+
+// goals
+const financeGoals = ref([
+    // 流入 
+    {
+        name: '理財收入',
+        startDate: '',
+        endDate: '',
+        pmt: 25000,
+        n: 0,
+        yield: 0,
+    },
+    {
+        name: '退休後收入',
+        startDate: '',
+        pmt: 25000,
+        n: 0,
+        yield: 0,
+    },
+    // 流出
+    {
+        name: '退休支出',
+        startDate: '',
+        endDate: '',
+        pmt: 25000,
+        n: 0,
+        yield: 0,
+    },
+    {
+        name: '購房首付',
+        startDate: '',
+        endDate: '',
+        pmt: 25000,
+        n: 0,
+        yield: 0,
+    },
+    {
+        name: '購房貸款',
+        startDate: '',
+        endDate: '',
+        pmt: 25000,
+        n: 0,
+        yield: 0,
+    },
+])
+
 </script>
 <style lang="scss" scoped>
 .calculator {
@@ -112,15 +168,19 @@ const security = ref({
     justify-content: center;
     gap: 8px;
 
-    >* {
+    .calculator__card {
         width: 100%;
     }
 }
 
 @media screen and (min-width:996px) {
     .calculator {
-        >* {
+        .calculator__card {
             width: calc(50% - 8px);
+        }
+
+        .calculator__card--100 {
+            width: 100%;
         }
     }
 }
