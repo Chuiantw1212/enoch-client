@@ -253,21 +253,44 @@ function drawAssetChart() {
     const date = new Date()
     const { riskFreeYield } = config.value
     const lifeExpectancy = retirement.value.age + retirement.value.lifeExpectancy
-
-    let pv = security.value.presentValue
-    let pmt = 0
-    let fv = 0
+    // 無風險利率 
     const riskFreeData: number[] = []
+    const riskFree = {
+        pv: security.value.presentValue,
+        pmt: 0,
+        fv: 0
+    }
+    // 目前投資報酬率
+    const currentReturnData: number[] = []
+    const currentReturn = {
+        pv: security.value.presentValue,
+        pmt: 0,
+        fv: 0,
+    }
+
     for (let i = profile.value.age; i < lifeExpectancy; i++) {
         labels.push(i)
+
+        /** 無風險部分 */
         // 紀錄pv
-        riskFreeData.push(pv)
+        riskFreeData.push(riskFree.pv)
         // 計算pmt
-        const pmt = 0
+        riskFree.pmt = 0
         // 計算fv
-        fv = pv * (1 + riskFreeYield / 100) + pmt
+        riskFree.fv = riskFree.pv * (1 + riskFreeYield / 100) + riskFree.pmt
         // 回存pv
-        pv = fv
+        riskFree.pv = riskFree.fv
+
+        /** 當前投資部分 */
+        // 紀錄pv
+        currentReturnData.push(currentReturn.pv)
+        // 計算pmt
+        currentReturn.pmt = 0
+        // 計算fv
+
+        currentReturn.fv = currentReturn.pv * (1 + security.value.presentIrr / 100) + currentReturn.pmt
+        // 回存pv
+        currentReturn.pv = currentReturn.fv
     }
 
     // 資料集
@@ -279,14 +302,14 @@ function drawAssetChart() {
         },
         {
             label: '現有投資率',
-            data: [],
+            data: currentReturnData,
             stacked: true,
         },
-        {
-            label: '所需報酬率',
-            data: [],
-            stacked: true,
-        },
+        // {
+        //     label: '所需報酬率',
+        //     data: [],
+        //     stacked: true,
+        // },
     ]
 
     const chartData = {
@@ -301,7 +324,7 @@ function drawAssetChart() {
     } else {
         const ctx: any = document.getElementById('assetChart')
         const chartInstance = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: chartData
         })
         chartRef = shallowRef(chartInstance)
