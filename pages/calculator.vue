@@ -149,14 +149,18 @@
             <template #header>
                 現金流量表
             </template>
-            <canvas class="calculator__chart" id="cashFlowChart"></canvas>
+            <el-row justify="center">
+                <canvas class="calculator__chart" id="cashFlowChart"></canvas>
+            </el-row>
         </el-card>
 
         <el-card class="calculator__card calculator__card--100">
             <template #header>
                 不同報酬率 / 資產變化比較表
             </template>
-            <canvas class="calculator__chart" id="assetChart"></canvas>
+            <el-row justify="center">
+                <canvas class="calculator__chart" id="assetChart"></canvas>
+            </el-row>
         </el-card>
 
         <el-card>
