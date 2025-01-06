@@ -29,7 +29,7 @@
             </template>
             <el-form>
                 <el-row>
-                    <!-- <el-col :span="12">
+                    <el-col :span="12">
                         <el-form-item label="稅後收入">
                             <el-input-number v-model="career.postTaxMonthlyIncome" :min="0" :step="1000" />
                         </el-form-item>
@@ -38,7 +38,7 @@
                         <el-form-item label="增長率%">
                             <el-input-number v-model="career.growthRate" :min="0" :max="100" :step="0.1" />
                         </el-form-item>
-                    </el-col> -->
+                    </el-col>
                 </el-row>
             </el-form>
         </el-card>
@@ -89,23 +89,25 @@
                 <el-table-column prop="startAge" label="開始年齡">
                     <template #default="scope">
                         <el-input-number v-model="scope.row.startAge"
-                            :disabled="['理財收入', '退休後收入', '退休後支出'].includes(scope.row.name)"></el-input-number>
+                            :disabled="['理財收入', '退休後收入', '退休後支出'].includes(scope.row.name)"
+                            @change="updateAllCharts()"></el-input-number>
                     </template>
                 </el-table-column>
                 <el-table-column prop="pmt" label="現金流">
                     <template #default="scope">
-                        <el-input-number v-model="scope.row.pmt"></el-input-number>
+                        <el-input-number v-model="scope.row.pmt" @change="updateAllCharts()"></el-input-number>
                     </template>
                 </el-table-column>
                 <el-table-column prop="n" label="為期n年">
                     <template #default="scope">
                         <el-input-number v-model="scope.row.n"
-                            :disabled="['理財收入', '退休後收入', '退休後支出', '購房首付'].includes(scope.row.name)"></el-input-number>
+                            :disabled="['理財收入', '退休後收入', '退休後支出', '購房首付'].includes(scope.row.name)"
+                            @change="updateAllCharts()"></el-input-number>
                     </template>
                 </el-table-column>
                 <el-table-column prop="yield" label="現金流增長率%">
                     <template #default="scope">
-                        <el-input-number v-model="scope.row.yield"></el-input-number>
+                        <el-input-number v-model="scope.row.yield" @change="updateAllCharts()"></el-input-number>
                     </template>
                 </el-table-column>
             </el-table>
@@ -168,7 +170,7 @@ const financeGoals = ref([
     {
         name: '退休後收入',
         startAge: 0,
-        pmt: 0,
+        pmt: 20000,
         n: 0,
         yield: 2,
     },
@@ -247,6 +249,11 @@ function onEstateChanged() {
     }
 }
 
+function updateAllCharts() {
+    drawCashFlowChart()
+    drawAssetChart()
+}
+
 
 let cashFlowChartRef = ref<Chart>()
 
@@ -260,8 +267,8 @@ function drawCashFlowChart() {
         for (let i = 0; i < lifeExpectancy - profile.value.age; i++) {
             const simAge = i + profile.value.age
             labels[i] = simAge
-            const isStarted = simAge > item.startAge
-            const isEnded = simAge > item.startAge + item.n
+            const isStarted = simAge >= item.startAge
+            const isEnded = simAge > item.startAge + item.n - 1
             if (isStarted && !isEnded) {
                 let itemYield = 1 + item.yield / 100
                 itemYield = Math.pow(itemYield, i)
@@ -277,6 +284,7 @@ function drawCashFlowChart() {
             label: item.name,
             data,
             stacked: true,
+            fill: true,
         }
     })
 
@@ -292,8 +300,25 @@ function drawCashFlowChart() {
     } else {
         const ctx: any = document.getElementById('cashFlowChart')
         const chartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: chartData
+            type: 'line',
+            data: chartData,
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '年齡'
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: '現金流'
+                        }
+                    }
+                }
+            },
         })
         cashFlowChartRef = shallowRef(chartInstance)
     }
@@ -408,6 +433,7 @@ onMounted(() => {
     onProfileChanged()
     onReqirementChanged()
     onEstateChanged()
+    updateAllCharts()
 })
 
 </script>
