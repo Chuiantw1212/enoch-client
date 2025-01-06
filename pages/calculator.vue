@@ -194,6 +194,7 @@ function onProfileChanged() {
         const { age, lifeExpectancy } = retirement.value
         const n = age + lifeExpectancy - profile.value.age
         financeIncome.n = n
+        debounceDrawYieldChart()
     }
 }
 
@@ -236,6 +237,10 @@ function onEstateChanged() {
 
 let chartRef = ref<Chart>()
 
+function debounceDrawYieldChart() {
+    debounce(drawYieldChart, 250)
+}
+
 function drawYieldChart() {
     let canvas = null
     if (chartRef.value) {
@@ -243,8 +248,10 @@ function drawYieldChart() {
     }
 
     const chartData = {
-        datasets: [],
-        labels: []
+        datasets: [{
+            data: [20, 10],
+        }],
+        labels: ['a', 'b']
     }
 
     // 繪圖
@@ -255,16 +262,11 @@ function drawYieldChart() {
         const ctx: any = document.getElementById('yieldChart')
         const chartInstance = new Chart(ctx, {
             type: 'bar',
-            data: chartData,
-            options: {
-                scales: {
-                    x: {
-                        stacked: true,
-                    },
-                    y: {
-                        stacked: true,
-                    },
-                }
+            data: {
+                datasets: [{
+                    data: [20, 10],
+                }],
+                labels: ['a', 'b']
             }
         })
         chartRef = shallowRef(chartInstance)
