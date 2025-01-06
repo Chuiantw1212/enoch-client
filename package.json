@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@element-plus/nuxt": "^1.1.1",
+    "@types/chart.js": "^2.9.41",
     "firebase-functions": "^6.2.0",
     "sass-embedded": "^1.83.0"
   }

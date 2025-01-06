@@ -180,7 +180,8 @@
     </div>
 </template>
 <script lang="ts" setup>
-import Chart from 'chart.js/auto';
+import Chart, { type TooltipItem } from 'chart.js/auto';
+import type { ChartTooltipItem, ChartTooltipOptions, } from '@types/chart.js';
 
 const config = ref({
     riskFreeRatePerYear: 2,
@@ -532,6 +533,14 @@ function drawAssetChart() {
             type: 'line',
             data: chartData,
             options: {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: formatToolTip
+                            // footer: showChildExpense
+                        }
+                    }
+                },
                 scales: {
                     x: {
                         title: {
@@ -550,6 +559,18 @@ function drawAssetChart() {
         })
         assetChartRef = shallowRef(chartInstance)
     }
+}
+
+function formatToolTip(tooltipItems: TooltipItem<any>) {
+    const { dataset, } = tooltipItems
+    console.log({
+        tooltipItems
+    })
+    const { label } = dataset
+    console.log({
+        label
+    })
+    return `${dataset.label}: 歲`
 }
 
 onMounted(() => {
