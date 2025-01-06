@@ -86,12 +86,14 @@
             <el-row>
                 <el-col :span="12">
                     <el-form-item label="現有資產">
-                        <el-input-number v-model="security.presentValue" :min="0" :step="100000" />
+                        <el-input-number v-model="security.presentValue" :min="0" :step="100000"
+                            @click="onAssetChanged()" />
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="投資報酬率">
-                        <el-input-number v-model="security.presentIrr" :min="0" :max="100" :step="0.1">
+                        <el-input-number v-model="security.presentIrr" :min="0" :max="100" :step="0.1"
+                            @click="onAssetChanged()">
                             <template #suffix>
                                 %
                             </template>
@@ -293,6 +295,10 @@ function onReqirementChanged() {
     }
 }
 
+function onAssetChanged() {
+    drawAssetChart()
+}
+
 function onEstateChanged() {
     // const date = new Date()
     // let currentYear = date.getFullYear()
@@ -491,7 +497,7 @@ function drawAssetChart() {
         // 紀錄fv
         requiredReturnData.push(Math.max(requiredReturn.fv, 0))
         // 更新並回存pv
-        requiredReturn.fv *= (1 + requiredRatePerYear / 100)
+        requiredReturn.fv *= (1 + security.value.expectedIrr / 100)
         requiredReturn.pv = requiredReturn.fv
     }
 
