@@ -16,7 +16,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="無風險利率%">
-                            <el-input-number v-model="config.riskFreeRate" :min="0" :max="100" :step="0.125" />
+                            <el-input-number v-model="config.riskFreeYield" :min="0" :max="100" :step="0.125" />
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -111,7 +111,7 @@
         </el-card>
 
         <el-card class="calculator__card calculator__card--100">
-            <canvas class="calculator__chart" id="yieldChart"></canvas>
+            <canvas class="calculator__chart" id="assetChart"></canvas>
         </el-card>
     </div>
 </template>
@@ -120,7 +120,7 @@ import Chart from 'chart.js/auto';
 import debounce from 'debounce';
 
 const config = ref({
-    riskFreeRate: 2,
+    riskFreeYield: 2,
 })
 
 const profile = ref({
@@ -194,7 +194,7 @@ function onProfileChanged() {
         const { age, lifeExpectancy } = retirement.value
         const n = age + lifeExpectancy - profile.value.age
         financeIncome.n = n
-        debounceDrawYieldChart()
+        debouncedrawAssetChart()
     }
 }
 
@@ -237,15 +237,13 @@ function onEstateChanged() {
 
 let chartRef = ref<Chart>()
 
-function debounceDrawYieldChart() {
-    console.log('debounceDrawYieldChart')
-    drawYieldChart()
-    // debounce(drawYieldChart, 250)
+function debouncedrawAssetChart() {
+    console.log('debouncedrawAssetChart')
+    drawAssetChart()
+    // debounce(drawAssetChart, 250)
 }
 
-function drawYieldChart() {
-    console.log('drawYieldChart')
-
+function drawAssetChart() {
     let canvas = null
     if (chartRef.value) {
         canvas = chartRef.value.canvas
@@ -253,16 +251,46 @@ function drawYieldChart() {
 
     const labels = []
     const date = new Date()
-    const calculateYear = date.getFullYear()
+    const { riskFreeYield } = config.value
     const lifeExpectancy = retirement.value.age + retirement.value.lifeExpectancy
+
+    let pv = security.value.presentValue
+    let pmt = 0
+    let fv = 0
+    const riskFreeData: number[] = []
     for (let i = profile.value.age; i < lifeExpectancy; i++) {
         labels.push(i)
+        // 紀錄pv
+        riskFreeData.push(pv)
+        // 計算pmt
+        const pmt = 0
+        // 計算fv
+        fv = pv * (1 + riskFreeYield / 100) + pmt
+        // 回存pv
+        pv = fv
     }
 
+    // 資料集
+    const datasets = [
+        {
+            label: '無風險利率',
+            data: riskFreeData,
+            stacked: true,
+        },
+        {
+            label: '現有投資率',
+            data: [],
+            stacked: true,
+        },
+        {
+            label: '所需報酬率',
+            data: [],
+            stacked: true,
+        },
+    ]
+
     const chartData = {
-        datasets: [{
-            data: [20, 10],
-        }],
+        datasets,
         labels,
     }
 
@@ -271,15 +299,10 @@ function drawYieldChart() {
         chartRef.value.data = chartData
         chartRef.value.update()
     } else {
-        const ctx: any = document.getElementById('yieldChart')
+        const ctx: any = document.getElementById('assetChart')
         const chartInstance = new Chart(ctx, {
             type: 'bar',
-            data: {
-                datasets: [{
-                    data: [20, 10],
-                }],
-                labels,
-            }
+            data: chartData
         })
         chartRef = shallowRef(chartInstance)
     }
