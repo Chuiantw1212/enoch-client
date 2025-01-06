@@ -198,6 +198,8 @@ const financeGoals = ref([
     },
 ])
 
+const cashflowDatasets = ref<any[]>([])
+
 // methods
 function onProfileChanged() {
     const financeIncome = financeGoals.value.find(item => {
@@ -287,13 +289,13 @@ function drawCashFlowChart() {
             fill: true,
         }
     })
+    cashflowDatasets.value = datasets
 
+    // 繪圖
     const chartData = {
         datasets,
         labels,
     }
-
-    // 繪圖
     if (cashFlowChartRef.value) {
         cashFlowChartRef.value.data = chartData
         cashFlowChartRef.value.update()
