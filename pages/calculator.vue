@@ -110,8 +110,8 @@
             </el-table>
         </el-card>
 
-        <el-card>
-            <canvas id="yieldChart"></canvas>
+        <el-card class="calculator__card calculator__card--100">
+            <canvas class="calculator__chart" id="yieldChart"></canvas>
         </el-card>
     </div>
 </template>
@@ -238,20 +238,32 @@ function onEstateChanged() {
 let chartRef = ref<Chart>()
 
 function debounceDrawYieldChart() {
-    debounce(drawYieldChart, 250)
+    console.log('debounceDrawYieldChart')
+    drawYieldChart()
+    // debounce(drawYieldChart, 250)
 }
 
 function drawYieldChart() {
+    console.log('drawYieldChart')
+
     let canvas = null
     if (chartRef.value) {
         canvas = chartRef.value.canvas
+    }
+
+    const labels = []
+    const date = new Date()
+    const calculateYear = date.getFullYear()
+    const lifeExpectancy = retirement.value.age + retirement.value.lifeExpectancy
+    for (let i = profile.value.age; i < lifeExpectancy; i++) {
+        labels.push(i)
     }
 
     const chartData = {
         datasets: [{
             data: [20, 10],
         }],
-        labels: ['a', 'b']
+        labels,
     }
 
     // 繪圖
@@ -266,7 +278,7 @@ function drawYieldChart() {
                 datasets: [{
                     data: [20, 10],
                 }],
-                labels: ['a', 'b']
+                labels,
             }
         })
         chartRef = shallowRef(chartInstance)
@@ -291,6 +303,10 @@ onMounted(() => {
     gap: 11px;
 
     .calculator__card {
+        width: 100%;
+    }
+
+    .calculator__chart {
         width: 100%;
     }
 }
