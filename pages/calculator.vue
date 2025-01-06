@@ -198,7 +198,15 @@ const financeGoals = ref([
     },
 ])
 
-const cashflowDatasets = ref<any[]>([])
+interface IDatasets {
+    label: string,
+    yield: number,
+    data: number[],
+    stacked: boolean,
+    fill: boolean,
+}
+
+const cashflowDatasets = ref<IDatasets[]>([])
 
 // methods
 function onProfileChanged() {
@@ -264,7 +272,7 @@ function drawCashFlowChart() {
     const lifeExpectancy = retirement.value.age + retirement.value.lifeExpectancy
 
     // 計算目標PMT
-    const datasets = financeGoals.value.map(item => {
+    const datasets: IDatasets[] = financeGoals.value.map(item => {
         const data = []
         for (let i = 0; i < lifeExpectancy - profile.value.age; i++) {
             const simAge = i + profile.value.age
@@ -277,13 +285,13 @@ function drawCashFlowChart() {
                 const pmt = item.pmt * itemYield
                 data.push(pmt)
             } else {
-                // 紀錄   
                 data.push(0)
             }
         }
 
         return {
             label: item.name,
+            yield: item.yield,
             data,
             stacked: true,
             fill: true,
@@ -342,9 +350,38 @@ function drawAssetChart() {
     const { riskFreeYield } = config.value
     const lifeExpectancy = retirement.value.age + retirement.value.lifeExpectancy
 
-    // 目標 
-    const financeIncome = financeGoals.value.find(item => {
-        return item.name === '理財收入'
+    // 計算現金流量表
+    const cashflowValues: number[] = cashflowDatasets.value.reduce((accumulator, currentValue) => {
+        const sum: number[] = accumulator
+        const data = currentValue.data
+        data.forEach((number, index) => {
+            if (sum[index]) {
+                sum[index] += number
+            } else {
+                sum[index] = number
+            }
+        })
+        return sum as any
+    }, [])
+
+    const cashflowFVs: number[] = cashflowDatasets.value.reduce((accumulator, currentValue) => {
+        const sum: number[] = accumulator
+        const data = currentValue.data
+        const returnYield = (1 + currentValue.yield / 100)
+        data.forEach((number, index) => {
+            if (number) {
+                const fv = Math.floor(number * Math.pow(returnYield, data.length - index))
+                if (sum[index]) {
+                    sum[index] += fv
+                } else {
+                    sum[index] = fv
+                }
+            }
+        })
+        return sum as any[]
+    }, [])
+    console.log({
+        cashflowFVs
     })
 
     // 無風險利率 
@@ -354,6 +391,20 @@ function drawAssetChart() {
         pmt: 0,
         fv: 0
     }
+
+    for (let i = 0; i < lifeExpectancy - profile.value.age; i++) {
+        labels.push(i + profile.value.age)
+        // 計算pmt
+        riskFree.pmt = cashflowValues[i]
+        // 計算fv
+        riskFree.fv = riskFree.pv + riskFree.pmt
+        // 紀錄fv
+        riskFreeData.push(Math.max(riskFree.fv, 0))
+        // 更新並回存pv
+        riskFree.fv *= (1 + riskFreeYield / 100)
+        riskFree.pv = riskFree.fv
+    }
+
     // 目前投資報酬率
     const currentReturnData: number[] = []
     const currentReturn = {
@@ -361,34 +412,19 @@ function drawAssetChart() {
         pmt: 0,
         fv: 0,
     }
-
     for (let i = 0; i < lifeExpectancy - profile.value.age; i++) {
-        /** 無風險部分 */
-        labels.push(i + profile.value.age)
         // 計算pmt
-        riskFree.pmt = Number(financeIncome?.pmt)
-        // 計算fv
-        riskFree.fv = riskFree.pv + riskFree.pmt
-        // 紀錄fv
-        riskFreeData.push(riskFree.fv)
-        // 更新並回存pv
-        riskFree.fv *= (1 + riskFreeYield / 100)
-        riskFree.pv = riskFree.fv
-    }
-
-    for (let i = 0; i < lifeExpectancy - profile.value.age; i++) {
-        /** 當前投資部分 */
-        // 計算pmt
-        currentReturn.pmt = Number(financeIncome?.pmt)
+        currentReturn.pmt = cashflowValues[i]
         // 計算fv
         currentReturn.fv = currentReturn.pv + currentReturn.pmt
         // 紀錄fv
-        currentReturnData.push(currentReturn.fv)
+        currentReturnData.push(Math.max(currentReturn.fv, 0))
         // 更新並回存pv
         currentReturn.fv *= (1 + security.value.presentIrr / 100)
         currentReturn.pv = currentReturn.fv
     }
 
+    // 理想投資報酬率
 
     // 資料集
     const datasets = [
