@@ -146,7 +146,7 @@ const security = ref({
 
 // goals
 const financeGoals = ref([
-    // 流入 
+    // 流入
     {
         name: '理財收入',
         startDate: new Date().toISOString(),
@@ -191,8 +191,7 @@ function onProfileChanged() {
         return item.name === '理財收入'
     })
     if (financeIncome) {
-        const { age, lifeExpectancy } = retirement.value
-        const n = age + lifeExpectancy - profile.value.age
+        const n = retirement.value.age - profile.value.age
         financeIncome.n = n
         debouncedrawAssetChart()
     }
@@ -250,9 +249,14 @@ function drawAssetChart() {
     }
 
     const labels = []
-    const date = new Date()
     const { riskFreeYield } = config.value
     const lifeExpectancy = retirement.value.age + retirement.value.lifeExpectancy
+
+    // 目標 
+    const financeIncome = financeGoals.value.find(item => {
+        return item.name === '理財收入'
+    })
+
     // 無風險利率 
     const riskFreeData: number[] = []
     const riskFree = {
@@ -272,24 +276,25 @@ function drawAssetChart() {
         labels.push(i)
 
         /** 無風險部分 */
-        // 紀錄pv
-        riskFreeData.push(riskFree.pv)
         // 計算pmt
-        riskFree.pmt = 0
+        riskFree.pmt = Number(financeIncome?.pmt)
         // 計算fv
-        riskFree.fv = riskFree.pv * (1 + riskFreeYield / 100) + riskFree.pmt
-        // 回存pv
+        riskFree.fv = riskFree.pv + riskFree.pmt
+        // 紀錄fv
+        riskFreeData.push(riskFree.fv)
+        // 更新並回存pv
+        riskFree.fv *= (1 + riskFreeYield / 100)
         riskFree.pv = riskFree.fv
 
         /** 當前投資部分 */
-        // 紀錄pv
-        currentReturnData.push(currentReturn.pv)
         // 計算pmt
-        currentReturn.pmt = 0
+        currentReturn.pmt = Number(financeIncome?.pmt)
         // 計算fv
-
-        currentReturn.fv = currentReturn.pv * (1 + security.value.presentIrr / 100) + currentReturn.pmt
-        // 回存pv
+        currentReturn.fv = currentReturn.pv + currentReturn.pmt
+        // 紀錄fv
+        currentReturnData.push(currentReturn.fv)
+        // 更新並回存pv
+        currentReturn.fv *= (1 + security.value.presentIrr / 100)
         currentReturn.pv = currentReturn.fv
     }
 
