@@ -50,7 +50,8 @@
             <el-row>
                 <el-col :span="12">
                     <el-form-item label="預計退休">
-                        <el-input-number v-model="retirement.age" :min="50" :max="70" :step="5" />
+                        <el-input-number v-model="retirement.age" :min="50" :max="70" :step="5"
+                            @change="onReqirementChanged()" />
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
@@ -85,10 +86,10 @@
                 <el-table-column prop="name" label="理財目標">
 
                 </el-table-column>
-                <el-table-column prop="startDate" label="開始年">
+                <el-table-column prop="startAge" label="開始年齡">
                     <template #default="scope">
-                        <el-date-picker v-model="scope.row.startDate" type="year"
-                            :disabled="['理財收入', '退休後收入', '退休後支出'].includes(scope.row.name)" />
+                        <el-input-number v-model="scope.row.startAge"
+                            :disabled="['理財收入', '退休後收入', '退休後支出'].includes(scope.row.name)"></el-input-number>
                     </template>
                 </el-table-column>
                 <el-table-column prop="pmt" label="現金流">
@@ -102,7 +103,7 @@
                             :disabled="['理財收入', '退休後收入', '退休後支出', '購房首付'].includes(scope.row.name)"></el-input-number>
                     </template>
                 </el-table-column>
-                <el-table-column prop="yield" label="現金流增長率">
+                <el-table-column prop="yield" label="現金流增長率%">
                     <template #default="scope">
                         <el-input-number v-model="scope.row.yield"></el-input-number>
                     </template>
@@ -111,6 +112,16 @@
         </el-card>
 
         <el-card class="calculator__card calculator__card--100">
+            <template #header>
+                現金流量表
+            </template>
+            <canvas class="calculator__chart" id="cashFlowChart"></canvas>
+        </el-card>
+
+        <el-card class="calculator__card calculator__card--100">
+            <template #header>
+                不同報酬率 / 資產變化比較表
+            </template>
             <canvas class="calculator__chart" id="assetChart"></canvas>
         </el-card>
     </div>
@@ -149,14 +160,14 @@ const financeGoals = ref([
     // 流入
     {
         name: '理財收入',
-        startDate: new Date().toISOString(),
+        startAge: 0,
         pmt: 2000,
         n: 0,
         yield: 2,
     },
     {
         name: '退休後收入',
-        startDate: '',
+        startAge: 0,
         pmt: 0,
         n: 0,
         yield: 2,
@@ -164,21 +175,21 @@ const financeGoals = ref([
     // 流出
     {
         name: '退休後支出',
-        startDate: '',
+        startAge: 0,
         pmt: -30000,
         n: 0,
         yield: 2,
     },
     {
         name: '購房首付',
-        startDate: new Date().toISOString(),
+        startAge: 35,
         pmt: -3000000,
         n: 1,
         yield: 2,
     },
     {
         name: '購房貸款',
-        startDate: new Date().toISOString(),
+        startAge: 35,
         pmt: -30000,
         n: 30,
         yield: 2,
@@ -192,8 +203,10 @@ function onProfileChanged() {
     })
     if (financeIncome) {
         const n = retirement.value.age - profile.value.age
+        financeIncome.startAge = profile.value.age
         financeIncome.n = n
         debouncedrawAssetChart()
+        drawCashFlowChart()
     }
 }
 
@@ -207,7 +220,7 @@ function onReqirementChanged() {
         return item.name === '退休後收入'
     })
     if (retirementIncome) {
-        retirementIncome.startDate = date.toISOString()
+        retirementIncome.startAge = retirement.value.age
         retirementIncome.n = retirement.value.lifeExpectancy
     }
 
@@ -215,7 +228,7 @@ function onReqirementChanged() {
         return item.name === '退休後支出'
     })
     if (retirementExpense) {
-        retirementExpense.startDate = date.toISOString()
+        retirementExpense.startAge = retirement.value.age
         retirementExpense.n = retirement.value.lifeExpectancy
     }
 }
@@ -234,18 +247,68 @@ function onEstateChanged() {
     }
 }
 
-let chartRef = ref<Chart>()
+
+let cashFlowChartRef = ref<Chart>()
+
+function drawCashFlowChart() {
+    const labels: number[] = []
+    const lifeExpectancy = retirement.value.age + retirement.value.lifeExpectancy
+
+    // 計算目標PMT
+    const datasets = financeGoals.value.map(item => {
+        const data = []
+        for (let i = 0; i < lifeExpectancy - profile.value.age; i++) {
+            const simAge = i + profile.value.age
+            labels[i] = simAge
+            const isStarted = simAge > item.startAge
+            const isEnded = simAge > item.startAge + item.n
+            if (isStarted && !isEnded) {
+                let itemYield = 1 + item.yield / 100
+                itemYield = Math.pow(itemYield, i)
+                const pmt = item.pmt * itemYield
+                data.push(pmt)
+            } else {
+                // 紀錄   
+                data.push(0)
+            }
+        }
+
+        return {
+            label: item.name,
+            data,
+            stacked: true,
+        }
+    })
+
+    const chartData = {
+        datasets,
+        labels,
+    }
+
+    // 繪圖
+    if (cashFlowChartRef.value) {
+        cashFlowChartRef.value.data = chartData
+        cashFlowChartRef.value.update()
+    } else {
+        const ctx: any = document.getElementById('cashFlowChart')
+        const chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: chartData
+        })
+        cashFlowChartRef = shallowRef(chartInstance)
+    }
+}
+
+let assetChartRef = ref<Chart>()
 
 function debouncedrawAssetChart() {
-    console.log('debouncedrawAssetChart')
     drawAssetChart()
-    // debounce(drawAssetChart, 250)
 }
 
 function drawAssetChart() {
     let canvas = null
-    if (chartRef.value) {
-        canvas = chartRef.value.canvas
+    if (assetChartRef.value) {
+        canvas = assetChartRef.value.canvas
     }
 
     const labels = []
@@ -272,10 +335,9 @@ function drawAssetChart() {
         fv: 0,
     }
 
-    for (let i = profile.value.age; i < lifeExpectancy; i++) {
-        labels.push(i)
-
+    for (let i = 0; i < lifeExpectancy - profile.value.age; i++) {
         /** 無風險部分 */
+        labels.push(i + profile.value.age)
         // 計算pmt
         riskFree.pmt = Number(financeIncome?.pmt)
         // 計算fv
@@ -285,7 +347,9 @@ function drawAssetChart() {
         // 更新並回存pv
         riskFree.fv *= (1 + riskFreeYield / 100)
         riskFree.pv = riskFree.fv
+    }
 
+    for (let i = 0; i < lifeExpectancy - profile.value.age; i++) {
         /** 當前投資部分 */
         // 計算pmt
         currentReturn.pmt = Number(financeIncome?.pmt)
@@ -297,6 +361,7 @@ function drawAssetChart() {
         currentReturn.fv *= (1 + security.value.presentIrr / 100)
         currentReturn.pv = currentReturn.fv
     }
+
 
     // 資料集
     const datasets = [
@@ -323,16 +388,16 @@ function drawAssetChart() {
     }
 
     // 繪圖
-    if (chartRef.value) {
-        chartRef.value.data = chartData
-        chartRef.value.update()
+    if (assetChartRef.value) {
+        assetChartRef.value.data = chartData
+        assetChartRef.value.update()
     } else {
         const ctx: any = document.getElementById('assetChart')
         const chartInstance = new Chart(ctx, {
             type: 'line',
             data: chartData
         })
-        chartRef = shallowRef(chartInstance)
+        assetChartRef = shallowRef(chartInstance)
     }
 }
 
