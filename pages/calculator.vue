@@ -163,14 +163,14 @@ const financeGoals = ref([
     {
         name: '理財收入',
         startAge: 0,
-        pmt: 2000,
+        pmt: 240000,
         n: 0,
         yield: 2,
     },
     {
         name: '退休後收入',
         startAge: 0,
-        pmt: 20000,
+        pmt: 300000,
         n: 0,
         yield: 2,
     },
@@ -178,14 +178,14 @@ const financeGoals = ref([
     {
         name: '退休後支出',
         startAge: 0,
-        pmt: -30000,
+        pmt: -360000,
         n: 0,
         yield: 2,
     },
     {
         name: '購房貸款',
         startAge: 35,
-        pmt: -30000,
+        pmt: -360000,
         n: 30,
         yield: 2,
     },
@@ -351,7 +351,7 @@ function drawAssetChart() {
     const lifeExpectancy = retirement.value.age + retirement.value.lifeExpectancy
 
     // 計算現金流量表
-    const cashflowValues: number[] = cashflowDatasets.value.reduce((accumulator, currentValue) => {
+    const cashflowValues: number[] = cashflowDatasets.value.reduce((accumulator: number[], currentValue) => {
         const sum: number[] = accumulator
         const data = currentValue.data
         data.forEach((number, index) => {
@@ -363,26 +363,6 @@ function drawAssetChart() {
         })
         return sum as any
     }, [])
-
-    const cashflowFVs: number[] = cashflowDatasets.value.reduce((accumulator, currentValue) => {
-        const sum: number[] = accumulator
-        const data = currentValue.data
-        const returnYield = (1 + currentValue.yield / 100)
-        data.forEach((number, index) => {
-            if (number) {
-                const fv = Math.floor(number * Math.pow(returnYield, data.length - index))
-                if (sum[index]) {
-                    sum[index] += fv
-                } else {
-                    sum[index] = fv
-                }
-            }
-        })
-        return sum as any[]
-    }, [])
-    console.log({
-        cashflowFVs
-    })
 
     // 無風險利率 
     const riskFreeData: number[] = []
@@ -424,7 +404,37 @@ function drawAssetChart() {
         currentReturn.pv = currentReturn.fv
     }
 
-    // 理想投資報酬率
+    /** 理想投資報酬率 */
+    // 先算現金流量表FV
+    const cashflowFVs: number[] = cashflowDatasets.value.reduce((accumulator: number[], currentValue) => {
+        const sum: number[] = accumulator
+        const data = currentValue.data
+        const returnYield = (1 + currentValue.yield / 100)
+        data.forEach((number, index) => {
+            const fv = Math.floor(number * Math.pow(returnYield, data.length - index))
+            if (sum[index]) {
+                sum[index] += fv
+            } else {
+                sum[index] = fv
+            }
+        })
+        return sum as any[]
+    }, [])
+    const cashflowFinalSum = cashflowFVs.reduce((sum, number) => {
+        return sum + number
+    }, 0)
+    // 回推理想投資報酬率
+    const requiredReturnData: number[] = []
+    const requiredReturn = {
+        pv: security.value.presentValue,
+        pmt: 0,
+        fv: cashflowFinalSum,
+    }
+    const requiredYield = cashflowFinalSum / security.value.presentValue
+    console.log({
+        requiredYield
+    })
+
 
     // 資料集
     const datasets = [
