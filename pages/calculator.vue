@@ -183,17 +183,17 @@ const financeGoals = ref([
         yield: 2,
     },
     {
-        name: '購房首付',
-        startAge: 35,
-        pmt: -3000000,
-        n: 1,
-        yield: 2,
-    },
-    {
         name: '購房貸款',
         startAge: 35,
         pmt: -30000,
         n: 30,
+        yield: 2,
+    },
+    {
+        name: '購房首付',
+        startAge: 35,
+        pmt: -3000000,
+        n: 1,
         yield: 2,
     },
 ])
@@ -236,17 +236,17 @@ function onReqirementChanged() {
 }
 
 function onEstateChanged() {
-    const date = new Date()
-    let currentYear = date.getFullYear()
-    currentYear += 3
-    date.setFullYear(currentYear)
+    // const date = new Date()
+    // let currentYear = date.getFullYear()
+    // currentYear += 3
+    // date.setFullYear(currentYear)
 
-    const estateMortgage = financeGoals.value.find(item => {
-        return item.name === '購房首付'
-    })
-    if (estateMortgage) {
+    // const estateMortgage = financeGoals.value.find(item => {
+    //     return item.name === '購房首付'
+    // })
+    // if (estateMortgage) {
 
-    }
+    // }
 }
 
 function updateAllCharts() {
