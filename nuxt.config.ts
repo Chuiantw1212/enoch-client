@@ -4,6 +4,8 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@element-plus/nuxt'],
   nitro: {
+    // https://github.com/nuxt/framework/issues/8301
+    preset: 'firebase',
     firebase: {
       gen: 2,
       httpsOptions: {

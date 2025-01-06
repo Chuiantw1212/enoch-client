@@ -1,8 +1,7 @@
 {
   "functions": [
     {
-      "source": "functions",
-      "codebase": "default",
+      "source": ".output/server",
       "ignore": [
         "node_modules",
         ".git",
