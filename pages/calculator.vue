@@ -99,7 +99,7 @@
                 <el-table-column prop="n" label="為期n年">
                     <template #default="scope">
                         <el-input-number v-model="scope.row.n"
-                            :disabled="['理財收入', '退休後收入', '退休後支出'].includes(scope.row.name)"></el-input-number>
+                            :disabled="['理財收入', '退休後收入', '退休後支出', '購房首付'].includes(scope.row.name)"></el-input-number>
                     </template>
                 </el-table-column>
                 <el-table-column prop="yield" label="現金流增長率">
@@ -109,9 +109,16 @@
                 </el-table-column>
             </el-table>
         </el-card>
+
+        <el-card>
+            <canvas id="yieldChart"></canvas>
+        </el-card>
     </div>
 </template>
 <script lang="ts" setup>
+import Chart from 'chart.js/auto';
+import debounce from 'debounce';
+
 const config = ref({
     riskFreeRate: 2,
 })
@@ -145,14 +152,14 @@ const financeGoals = ref([
         startDate: new Date().toISOString(),
         pmt: 2000,
         n: 0,
-        yield: 0,
+        yield: 2,
     },
     {
         name: '退休後收入',
         startDate: '',
         pmt: 0,
         n: 0,
-        yield: 0,
+        yield: 2,
     },
     // 流出
     {
@@ -160,21 +167,21 @@ const financeGoals = ref([
         startDate: '',
         pmt: -30000,
         n: 0,
-        yield: 0,
+        yield: 2,
     },
     {
         name: '購房首付',
-        startDate: '',
-        pmt: 0,
-        n: 0,
-        yield: 0,
+        startDate: new Date().toISOString(),
+        pmt: -3000000,
+        n: 1,
+        yield: 2,
     },
     {
         name: '購房貸款',
-        startDate: '',
-        pmt: 0,
-        n: 0,
-        yield: 0,
+        startDate: new Date().toISOString(),
+        pmt: -30000,
+        n: 30,
+        yield: 2,
     },
 ])
 
@@ -223,7 +230,44 @@ function onEstateChanged() {
         return item.name === '購房首付'
     })
     if (estateMortgage) {
-        
+
+    }
+}
+
+let chartRef = ref<Chart>()
+
+function drawYieldChart() {
+    let canvas = null
+    if (chartRef.value) {
+        canvas = chartRef.value.canvas
+    }
+
+    const chartData = {
+        datasets: [],
+        labels: []
+    }
+
+    // 繪圖
+    if (chartRef.value) {
+        chartRef.value.data = chartData
+        chartRef.value.update()
+    } else {
+        const ctx: any = document.getElementById('yieldChart')
+        const chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: chartData,
+            options: {
+                scales: {
+                    x: {
+                        stacked: true,
+                    },
+                    y: {
+                        stacked: true,
+                    },
+                }
+            }
+        })
+        chartRef = shallowRef(chartInstance)
     }
 }
 
@@ -242,7 +286,7 @@ onMounted(() => {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 8px;
+    gap: 11px;
 
     .calculator__card {
         width: 100%;
