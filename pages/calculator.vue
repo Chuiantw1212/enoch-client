@@ -368,6 +368,13 @@ function drawCashFlowChart() {
             type: 'line',
             data: chartData,
             options: {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: formatToolTip
+                        }
+                    }
+                },
                 scales: {
                     x: {
                         title: {
@@ -538,7 +545,6 @@ function drawAssetChart() {
                     tooltip: {
                         callbacks: {
                             label: formatToolTip
-                            // footer: showChildExpense
                         }
                     }
                 },
@@ -563,10 +569,11 @@ function drawAssetChart() {
 }
 
 function formatToolTip(tooltipItems: TooltipItem<any>) {
-    const { raw, dataset, label } = tooltipItems
+    const { raw, dataset, } = tooltipItems
+    const { label } = dataset
     const formatNumber = Math.round(raw as number / 10000)
     const formatString = formatNumber.toLocaleString()
-    return `${formatString}萬`
+    return `${label}:${formatString}萬`
 }
 
 onMounted(() => {
