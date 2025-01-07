@@ -8,7 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "postbuild": "cd .output/server && pnpm install",
+    "postbuild": "cd .output/server && pnpm add @google-cloud/functions-framework",
     "deploy": "firebase use enoch-259ad && firebase deploy"
   },
   "dependencies": {
