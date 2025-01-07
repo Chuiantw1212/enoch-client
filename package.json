@@ -11,6 +11,7 @@
     "deploy": "firebase use enoch-259ad & firebase deploy"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "chart.js": "^4.4.7",
     "debounce": "^2.2.0",
     "firebase": "^11.1.0",
