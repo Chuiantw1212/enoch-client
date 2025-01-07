@@ -12,7 +12,6 @@
     "deploy": "firebase use enoch-259ad && firebase deploy"
   },
   "dependencies": {
-    "@popperjs/core": "npm:@sxzz/popperjs-es@^2.11.7",
     "chart.js": "^4.4.7",
     "debounce": "^2.2.0",
     "firebase": "^11.1.0",
@@ -22,9 +21,7 @@
   },
   "devDependencies": {
     "@element-plus/nuxt": "^1.1.1",
-    "@google-cloud/functions-framework": "^3.4.5",
     "@types/chart.js": "^2.9.41",
-    "element-plus": "^2.9.2",
     "firebase-functions": "^6.2.0",
     "sass-embedded": "^1.83.0"
   }
