@@ -8,6 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "predeploy": "cd .output/server & pnpm install",
     "deploy": "firebase use enoch-259ad & firebase deploy"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@element-plus/nuxt": "^1.1.1",
+    "@google-cloud/functions-framework": "^3.4.5",
     "@types/chart.js": "^2.9.41",
     "element-plus": "^2.9.2",
     "firebase-functions": "^6.2.0",
