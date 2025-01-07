@@ -323,7 +323,7 @@ function updateAllCharts() {
 let cashFlowChartRef = ref<Chart>()
 
 function drawCashFlowChart() {
-    const labels: number[] = []
+    const labels: string[] = []
     const lifeExpectancy = retirement.value.age + retirement.value.lifeExpectancy
 
     // 計算目標PMT
@@ -331,7 +331,7 @@ function drawCashFlowChart() {
         const data = []
         for (let i = 0; i < lifeExpectancy - profile.value.age; i++) {
             const simAge = i + profile.value.age
-            labels[i] = simAge
+            labels[i] = `${simAge}歲`
             const isStarted = simAge >= item.startAge
             const isEnded = simAge > item.startAge + item.n - 1
             if (isStarted && !isEnded) {
@@ -428,7 +428,8 @@ function drawAssetChart() {
     }
 
     for (let i = 0; i < lifeExpectancy - profile.value.age; i++) {
-        labels.push(i + profile.value.age)
+        const simAge = i + profile.value.age
+        labels.push(`${simAge}歲`)
         // 計算pmt
         riskFree.pmt = cashflowValues[i]
         // 計算fv
@@ -562,15 +563,10 @@ function drawAssetChart() {
 }
 
 function formatToolTip(tooltipItems: TooltipItem<any>) {
-    const { dataset, } = tooltipItems
-    console.log({
-        tooltipItems
-    })
-    const { label } = dataset
-    console.log({
-        label
-    })
-    return `${dataset.label}: 歲`
+    const { raw, dataset, label } = tooltipItems
+    const formatNumber = Math.round(raw as number / 10000)
+    const formatString = formatNumber.toLocaleString()
+    return `${formatString}萬`
 }
 
 onMounted(() => {
