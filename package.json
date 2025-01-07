@@ -8,8 +8,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "predeploy": "cd .output/server & pnpm install",
-    "deploy": "firebase use enoch-259ad & firebase deploy"
+    "postbuild": "cd .output/server && pnpm install",
+    "deploy": "firebase use enoch-259ad && firebase deploy"
   },
   "dependencies": {
     "@popperjs/core": "npm:@sxzz/popperjs-es@^2.11.7",
