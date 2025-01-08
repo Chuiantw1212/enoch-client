@@ -1,6 +1,7 @@
 <template>
-    <h1>速算多目標理財規劃</h1>
-
+    <h1 class="header">
+        速算多目標理財規劃
+    </h1>
     <div class="calculator">
         <el-card class="calculator__card">
             <template #header>
@@ -176,12 +177,18 @@
                     </template>
                 </el-input-number>
             </el-form-item>
+            <template #footer>
+                <el-button @click="exportAsPdf()">
+                    匯出
+                </el-button>
+            </template>
         </el-card>
     </div>
 </template>
 <script lang="ts" setup>
 import Chart, { type TooltipItem } from 'chart.js/auto';
-import type { ChartTooltipItem, ChartTooltipOptions, } from '@types/chart.js';
+import { jsPDF } from "jspdf";
+import NotoSansTC from '~/public/NotoSansTC-VariableFont_wght.ttf'
 
 const config = ref({
     riskFreeRatePerYear: 2,
@@ -576,6 +583,19 @@ function formatToolTip(tooltipItems: TooltipItem<any>) {
     return `${label}:${formatString}萬`
 }
 
+function exportAsPdf() {
+    const doc = new jsPDF();
+    doc.addFileToVFS("NotoSansTC.ttf", NotoSansTC);
+    doc.setFont("NotoSansTC");
+
+    doc.html(document.body, {
+        callback: function (doc) {
+            doc.save();
+        },
+        windowWidth: 768,
+    });
+}
+
 onMounted(() => {
     if (window.origin === 'http://localhost:3000') {
 
@@ -588,7 +608,14 @@ onMounted(() => {
 
 </script>
 <style lang="scss" scoped>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap');
+
+.header {
+    font-family: "Noto Sans TC", serif;
+}
+
 .calculator {
+    font-family: "Noto Sans TC", serif;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
