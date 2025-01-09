@@ -3,11 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "dev": "nuxt dev",
+    "build": "nuxt build",
     "postbuild": "cd .output/server && pnpm add @google-cloud/functions-framework",
     "deploy": "firebase use enoch-259ad && firebase deploy"
   },
