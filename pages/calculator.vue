@@ -113,9 +113,8 @@
                 <el-table :data="financeGoals" style="width: 100%">
                     <el-table-column prop="name" label="理財目標">
                         <template #default="scope">
-                            <el-select v-model="scope.row.name">
-                                <el-option v-for="item in financeGoalNames" :key="item" :label="item.label"
-                                    :value="item" />
+                            <el-select v-model="scope.row.name" @change="updateAllCharts()">
+                                <el-option v-for="item in financeGoalNames" :key="item" :label="item" :value="item" />
                             </el-select>
                         </template>
                     </el-table-column>
@@ -478,30 +477,53 @@ function drawAssetChart() {
 
     /** 理想投資報酬率 */
     // 計算每期淨現金流
-    const expectedIrr = irr([security.value.presentValue, ...netCashflows.value]);
-    security.value.expectedIrr = expectedIrr * 100
+    const completeCashflows = [security.value.presentValue, ...netCashflows.value]
+    let initialCashflows = completeCashflows
+    let expectedIrr: number = irr(initialCashflows)
+    expectedIrr = Math.round(expectedIrr * 1000) / 1000;
 
-    // 計算資產變化
-    const requiredReturnData: number[] = calculateAssetData({
+
+    // 暴力破解期望IRR
+    let requiredReturnData: number[] = []
+    requiredReturnData = calculateAssetData({
         n: lifeExpectancy - profile.value.age,
-        rate: security.value.expectedIrr / 100,
+        rate: expectedIrr,
         pv: security.value.presentValue,
-        cashflows: netCashflows.value
+        cashflows: netCashflows.value,
+        noNegative: true,
     })
+    while (requiredReturnData.length < n - 1) {
+        expectedIrr += 0.001
+        console.log({
+            requiredReturnData,
+            expectedIrr
+        })
+        requiredReturnData = calculateAssetData({
+            n: lifeExpectancy - profile.value.age,
+            rate: expectedIrr,
+            pv: security.value.presentValue,
+            cashflows: netCashflows.value,
+            noNegative: true,
+        })
+    }
+    security.value.expectedIrr = expectedIrr * 100
 
     // 資料集
     const datasets = [
         {
             label: '無風險利率',
             data: riskFreeData,
+            fill: true,
         },
         {
             label: '現有投資率',
             data: currentReturnData,
+            fill: true,
         },
         {
             label: '所需報酬率',
             data: requiredReturnData,
+            fill: true,
         },
     ]
 
@@ -578,11 +600,12 @@ async function exportAsPdf() {
     // });
 }
 
-function calculateAssetData(payload: { n: number, rate: number, pv: number, cashflows: number[], }) {
+function calculateAssetData(payload: { n: number, rate: number, pv: number, cashflows: number[], noNegative?: boolean }) {
     const n = payload.n
     const rate = payload.rate
     const cashflows = payload.cashflows
     const data = []
+    const noNegative = payload.noNegative ?? false
     let pv = payload.pv
     let fv = 0
     for (let i = 0; i < n; i++) {
@@ -593,6 +616,9 @@ function calculateAssetData(payload: { n: number, rate: number, pv: number, cash
         // 計算並記錄fv
         fv = pv
         data.push(fv)
+        if (noNegative && fv < 0) {
+            return data
+        }
         // 更新並回存pv
         pv = fv
     }
