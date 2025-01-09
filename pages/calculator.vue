@@ -235,7 +235,7 @@ const financeGoals = ref([
     {
         name: '理財收入',
         startAge: 0,
-        pmt: 300000,
+        pmt: 200000,
         n: 0,
         ratePerYear: 2,
     },
@@ -272,13 +272,14 @@ const financeGoals = ref([
 
 interface IDatasets {
     label: string,
-    ratePerYear: number,
+    ratePerYear?: number,
     data: number[],
     stacked: boolean,
     fill: boolean,
 }
 
 const cashflowDatasets = ref<IDatasets[]>([])
+const netCashflows = ref<number[]>([])
 
 // methods
 function onProfileChanged() {
@@ -373,11 +374,32 @@ function drawCashFlowChart() {
             fill: true,
         }
     })
-    cashflowDatasets.value = datasets
+    // 計算淨現金流
+    netCashflows.value = datasets.reduce((accumulator: number[], currentValue) => {
+        const sum: number[] = accumulator
+        const data = currentValue.data
+        data.forEach((number, index) => {
+            const pmt = number
+            if (sum[index]) {
+                sum[index] += pmt
+            } else {
+                sum[index] = pmt
+            }
+        })
+        return sum as number[]
+    }, [])
+    // const netCashflowDataset = {
+    //     label: '淨現金流',
+    //     data: netCashflows,
+    //     stacked: true,
+    //     fill: true,
+    // }
+    // labels.push('淨現金流')
+    cashflowDatasets.value = [...datasets,]
 
     // 繪圖
     const chartData = {
-        datasets,
+        datasets: cashflowDatasets.value,
         labels,
     }
     if (cashFlowChartRef.value) {
@@ -489,35 +511,30 @@ function drawAssetChart() {
     }
 
     /** 理想投資報酬率 */
-    // 先算現金流量表FV
-    const cashflowFVs: number[] = cashflowDatasets.value.reduce((accumulator: number[], currentValue) => {
+    // 計算每期淨現金流
+    const cashflows: number[] = cashflowDatasets.value.reduce((accumulator: number[], currentValue) => {
         const sum: number[] = accumulator
         const data = currentValue.data
-        const returnRatePerYear = (1 + currentValue.ratePerYear / 100)
+        // const returnRatePerYear = (1 + currentValue.ratePerYear / 100)
         data.forEach((number, index) => {
-            const fv = Math.floor(number * Math.pow(returnRatePerYear, data.length - index))
+            const pmt = number
             if (sum[index]) {
-                sum[index] += fv
+                sum[index] += pmt
             } else {
-                sum[index] = fv
+                sum[index] = pmt
             }
         })
-        return sum as any[]
+        return sum as number[]
     }, [])
-    const cashflowFinalSum = - cashflowFVs.reduce((sum, number) => {
-        return sum + number
-    }, 0)
-    // 回推理想投資報酬率
-    const valueRatio = cashflowFinalSum / security.value.presentValue
-    const root = Math.pow(valueRatio, 1 / cashflowFVs.length)
-    const requiredRatePerYear: number = Number(Number(root - 1).toFixed(3))
-    security.value.expectedIrr = requiredRatePerYear * 100
+    const expectedIrr = calculateIRR(cashflows);
+    security.value.expectedIrr = expectedIrr
+
     // 計算資產變化
     const requiredReturnData: number[] = []
     const requiredReturn = {
         pv: security.value.presentValue,
         pmt: 0,
-        fv: cashflowFinalSum,
+        fv: 0,
     }
     for (let i = 0; i < lifeExpectancy - profile.value.age; i++) {
         // 計算pmt
@@ -525,7 +542,7 @@ function drawAssetChart() {
         // 計算fv
         requiredReturn.fv = requiredReturn.pv + requiredReturn.pmt
         // 紀錄fv
-        requiredReturnData.push(Math.max(requiredReturn.fv, 0))
+        requiredReturnData.push(requiredReturn.fv)
         // 更新並回存pv
         requiredReturn.fv *= (1 + security.value.expectedIrr / 100)
         requiredReturn.pv = requiredReturn.fv
@@ -619,6 +636,41 @@ async function exportAsPdf() {
     //     windowWidth: 768,
     // });
 }
+
+function calculateIRR(CArray: number[]) {
+    let min = 0.0;
+    let max = 1.0;
+    let c = 0;
+    let guest = 0
+    let NPV = 0
+    do {
+        guest = (min + max) / 2;
+        NPV = 0;
+        for (var j = 0; j < CArray.length; j++) {
+            NPV += CArray[j] / Math.pow((1 + guest), j);
+        }
+        if (NPV > 0) {
+            min = guest;
+            c++;
+        }
+        else {
+            max = guest;
+            c++;
+        }
+
+        if (c >= 15) { return guest * 100; }
+    } while (Math.abs(NPV) > 0.000001);
+    return guest * 100;
+}
+
+// // Example usage:
+// const cashflows = [-1000, 200, 300, 400, 500]; // Initial investment followed by cash inflows
+// try {
+//     const irr = calculateIRR(cashflows);
+//     console.log(`Calculated IRR: ${(irr * 100).toFixed(2)}%`);
+// } catch (error) {
+//     console.error(error.message);
+// }
 
 onMounted(() => {
     if (window.origin === 'http://localhost:3000') {
