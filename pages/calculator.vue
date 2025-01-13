@@ -38,10 +38,11 @@
                     職涯
                 </template>
                 <el-form>
-                    <el-row>
+                    <el-row :gutter="20">
                         <el-col :span="12">
                             <el-form-item label="稅後收入">
-                                <el-input-number v-model="career.postTaxMonthlyIncome" :min="0" :step="1000" />
+                                <el-input v-model="career.postTaxMonthlyIncome" :formatter="formatMoney"
+                                    :parser="parseMoney"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
@@ -89,11 +90,11 @@
                 <template #header>
                     生息資產
                 </template>
-                <el-row>
+                <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="現有資產">
-                            <el-input-number v-model="security.presentValue" :min="0" :step="100000"
-                                @click="onAssetChanged()" />
+                            <el-input v-model="security.presentValue" :min="0" :step="100000" @click="onAssetChanged()"
+                                :formatter="formatMoney" :parser="parseMoney"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -116,16 +117,12 @@
                             <el-input :model-value="scope.row.name"
                                 :disabled="['理財收入', '退休後收入', '退休後支出'].includes(scope.row.name)">
                             </el-input>
-                            <!-- <el-select v-model="scope.row.name" @change="updateAllCharts()">
-                                <el-option v-for="item in financeGoalNames" :key="item" :label="item" :value="item" />
-                            </el-select> -->
                         </template>
                     </el-table-column>
                     <el-table-column prop="startAge" label="開始年齡">
                         <template #default="scope">
                             <el-input-number v-model="scope.row.startAge"
-                                :disabled="['理財收入', '退休後收入', '退休後支出'].includes(scope.row.name)"
-                                @change="updateAllCharts()">
+                                :disabled="['理財收入', '退休後支出'].includes(scope.row.name)" @change="updateAllCharts()">
                                 <template #suffix>
                                     歲
                                 </template>
@@ -134,8 +131,8 @@
                     </el-table-column>
                     <el-table-column prop="pmt" label="現金流">
                         <template #default="scope">
-                            <el-input-number v-model="scope.row.pmt" :step="10000"
-                                @change="updateAllCharts()"></el-input-number>
+                            <el-input v-model="scope.row.pmt" :step="10000" @change="updateAllCharts()"
+                                :formatter="formatMoney" :parser="parseMoney"></el-input>
                         </template>
                     </el-table-column>
                     <el-table-column prop="n" label="持續年期">
@@ -626,6 +623,14 @@ function calculateAssetData(payload: { n: number, rate: number, pv: number, cash
         pv = fv
     }
     return data
+}
+
+function formatMoney(value: string) {
+    return `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+function parseMoney(value: string) {
+    return value.replace(/\$\s?|(,*)/g, '')
 }
 
 onMounted(() => {
