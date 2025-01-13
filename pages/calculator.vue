@@ -30,24 +30,41 @@
                             </el-form-item>
                         </el-col>
                     </el-row>
-                </el-form>
-            </el-card>
-
-            <el-card class="calculator__card">
-                <template #header>
-                    職涯
-                </template>
-                <el-form>
-                    <el-row :gutter="20">
+                    <el-divider content-position="left">退休</el-divider>
+                    <el-row>
                         <el-col :span="12">
-                            <el-form-item label="稅後收入">
-                                <el-input v-model="career.postTaxMonthlyIncome" :formatter="formatMoney"
-                                    :parser="parseMoney"></el-input>
+                            <el-form-item label="預計退休">
+                                <el-input-number v-model="retirement.age" :min="50" :max="70" Ｆ
+                                    @change="onReqirementChanged()">
+                                    <template #suffix>
+                                        歲
+                                    </template>
+                                </el-input-number>
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="增長率">
-                                <el-input-number v-model="career.growthRate" :min="0" :max="100" :step="0.1">
+                            <el-form-item label="退休後餘命">
+                                <el-input-number v-model="retirement.lifeExpectancy" :min="0" :max="120" Ｆ
+                                    @change="onReqirementChanged()">
+                                    <template #suffix>
+                                        年
+                                    </template>
+                                </el-input-number>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-divider content-position="left">生息資產</el-divider>
+                    <el-row :gutter="20">
+                        <el-col :span="12">
+                            <el-form-item label="現有資產">
+                                <el-input v-model="security.presentValue" :min="0" :step="100000"
+                                    @click="onAssetChanged()" :formatter="formatMoney" :parser="parseMoney"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-form-item label="投資報酬率">
+                                <el-input-number v-model="security.presentIrr" :min="0" :max="100" :step="0.1"
+                                    @click="onAssetChanged()">
                                     <template #suffix>
                                         %
                                     </template>
@@ -58,64 +75,12 @@
                 </el-form>
             </el-card>
 
-            <el-card class="calculator__card">
-                <template #header>
-                    退休
-                </template>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="預計退休">
-                            <el-input-number v-model="retirement.age" :min="50" :max="70" Ｆ
-                                @change="onReqirementChanged()">
-                                <template #suffix>
-                                    歲
-                                </template>
-                            </el-input-number>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="退休後餘命">
-                            <el-input-number v-model="retirement.lifeExpectancy" :min="0" :max="120" Ｆ
-                                @change="onReqirementChanged()">
-                                <template #suffix>
-                                    年
-                                </template>
-                            </el-input-number>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-            </el-card>
-
-            <el-card class="calculator__card">
-                <template #header>
-                    生息資產
-                </template>
-                <el-row :gutter="20">
-                    <el-col :span="12">
-                        <el-form-item label="現有資產">
-                            <el-input v-model="security.presentValue" :min="0" :step="100000" @click="onAssetChanged()"
-                                :formatter="formatMoney" :parser="parseMoney"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="投資報酬率">
-                            <el-input-number v-model="security.presentIrr" :min="0" :max="100" :step="0.1"
-                                @click="onAssetChanged()">
-                                <template #suffix>
-                                    %
-                                </template>
-                            </el-input-number>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-            </el-card>
-
             <el-card class="calculator__card calculator__card--100">
                 <el-table :data="financeGoals" style="width: 100%">
                     <el-table-column prop="name" label="理財目標">
                         <template #default="scope">
                             <el-input :model-value="scope.row.name"
-                                :disabled="['理財&其他收入', '退休後收入', '退休後支出'].includes(scope.row.name)">
+                                :disabled="['理財&其他收入', '退休前收入', '退休後收入', '退休後支出'].includes(scope.row.name)">
                             </el-input>
                         </template>
                     </el-table-column>
@@ -138,7 +103,8 @@
                     <el-table-column prop="n" label="持續年期">
                         <template #default="scope">
                             <el-input-number v-model="scope.row.n"
-                                :disabled="['理財&其他收入', '退休後收入', '退休後支出', '購房首付'].includes('')" @change="updateAllCharts()">
+                                :disabled="['理財&其他收入', '退休前收入', '退休後收入', '退休後支出', '購房首付'].includes('')"
+                                @change="updateAllCharts()">
                                 <template #suffix>
                                     年
                                 </template>
@@ -210,10 +176,10 @@ const profile = ref({
     age: 34,
 })
 
-const career = ref({
-    postTaxMonthlyIncome: 60000,
-    growthRate: 2,
-})
+// const career = ref({
+//     postTaxMonthlyIncome: 60000,
+//     growthRate: 2,
+// })
 
 const retirement = ref({
     age: 70,
@@ -228,8 +194,6 @@ const security = ref({
 })
 
 // goals
-const financeGoalNames = ref(['理財&其他收入', '退休後收入', '退休後支出', '購房貸款', '購房首付'])
-
 const financeGoals = ref([
     // 流入
     {
@@ -290,16 +254,27 @@ const netCashflows = ref<number[]>([])
 
 // methods
 function onProfileChanged() {
+    const workingPeriod = retirement.value.age - profile.value.age
+
     const financeIncome = financeGoals.value.find(item => {
         return item.name === '理財&其他收入'
     })
     if (financeIncome) {
-        const n = retirement.value.age - profile.value.age
         financeIncome.startAge = profile.value.age
-        financeIncome.n = n
-        debouncedrawAssetChart()
-        drawCashFlowChart()
+        financeIncome.n = workingPeriod
     }
+
+    const careerIncome = financeGoals.value.find(item => {
+        return item.name === '退休前收入'
+    })
+
+    if (careerIncome) {
+        careerIncome.startAge = profile.value.age
+        careerIncome.n = workingPeriod
+    }
+
+    debouncedrawAssetChart()
+    drawCashFlowChart()
 }
 
 function onReqirementChanged() {
@@ -377,7 +352,7 @@ function drawCashFlowChart() {
             label: item.name,
             ratePerYear: item.ratePerYear,
             data,
-            stacked: true,
+            stacked: false,
             fill: true,
         }
     })
@@ -395,14 +370,17 @@ function drawCashFlowChart() {
         })
         return sum as number[]
     }, [])
-    const netCashflowDataset = {
-        label: '淨現金流',
-        data: netCashflows.value,
-        stacked: true,
-        fill: true,
-    }
-    labels.push('淨現金流')
-    cashflowDatasets.value = [...datasets, netCashflowDataset]
+    cashflowDatasets.value = datasets
+
+    // // 驗證淨現金流 
+    // const netCashflowDataset = {
+    //     label: '淨現金流',
+    //     data: netCashflows.value,
+    //     stacked: true,
+    //     fill: true,
+    // }
+    // labels.push('淨現金流')
+    // cashflowDatasets.value.push(netCashflowDataset)
 
     // 繪圖
     const chartData = {
@@ -482,6 +460,7 @@ function drawAssetChart() {
         cashflows: netCashflows.value
     })
 
+
     /** 理想投資報酬率 */
     // 計算每期淨現金流
     const completeCashflows = [security.value.presentValue, ...netCashflows.value]
@@ -499,21 +478,30 @@ function drawAssetChart() {
         cashflows: netCashflows.value,
         noNegative: true,
     })
-    while (requiredReturnData.length < n - 1) {
-        expectedIrr += 0.001
-        console.log({
-            requiredReturnData,
-            expectedIrr
-        })
+
+    // 暴力破解避免暫時性的負資產
+    if (Math.abs(expectedIrr) === Infinity) {
+        security.value.expectedIrr = 0
         requiredReturnData = calculateAssetData({
             n: lifeExpectancy - profile.value.age,
-            rate: expectedIrr,
+            rate: 0,
             pv: security.value.presentValue,
             cashflows: netCashflows.value,
-            noNegative: true,
         })
+    } else {
+        while (requiredReturnData.length < n - 1) {
+            expectedIrr += 0.001
+            requiredReturnData = calculateAssetData({
+                n: lifeExpectancy - profile.value.age,
+                rate: expectedIrr,
+                pv: security.value.presentValue,
+                cashflows: netCashflows.value,
+                noNegative: true,
+            })
+        }
+        security.value.expectedIrr = expectedIrr * 100
     }
-    security.value.expectedIrr = expectedIrr * 100
+
 
     // 資料集
     const datasets = [
