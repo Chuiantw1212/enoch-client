@@ -115,14 +115,14 @@
                     <el-table-column prop="name" label="理財目標">
                         <template #default="scope">
                             <el-input :model-value="scope.row.name"
-                                :disabled="['理財收入', '退休後收入', '退休後支出'].includes(scope.row.name)">
+                                :disabled="['理財&其他收入', '退休後收入', '退休後支出'].includes(scope.row.name)">
                             </el-input>
                         </template>
                     </el-table-column>
                     <el-table-column prop="startAge" label="開始年齡">
                         <template #default="scope">
                             <el-input-number v-model="scope.row.startAge"
-                                :disabled="['理財收入', '退休後支出'].includes(scope.row.name)" @change="updateAllCharts()">
+                                :disabled="['理財&其他收入', '退休後支出'].includes(scope.row.name)" @change="updateAllCharts()">
                                 <template #suffix>
                                     歲
                                 </template>
@@ -138,7 +138,7 @@
                     <el-table-column prop="n" label="持續年期">
                         <template #default="scope">
                             <el-input-number v-model="scope.row.n"
-                                :disabled="['理財收入', '退休後收入', '退休後支出', '購房首付'].includes('')" @change="updateAllCharts()">
+                                :disabled="['理財&其他收入', '退休後收入', '退休後支出', '購房首付'].includes('')" @change="updateAllCharts()">
                                 <template #suffix>
                                     年
                                 </template>
@@ -228,12 +228,12 @@ const security = ref({
 })
 
 // goals
-const financeGoalNames = ref(['理財收入', '退休後收入', '退休後支出', '購房貸款', '購房首付'])
+const financeGoalNames = ref(['理財&其他收入', '退休後收入', '退休後支出', '購房貸款', '購房首付'])
 
 const financeGoals = ref([
     // 流入
     {
-        name: '理財收入',
+        name: '理財&其他收入',
         startAge: 0,
         pmt: 200000,
         n: 0,
@@ -284,7 +284,7 @@ const netCashflows = ref<number[]>([])
 // methods
 function onProfileChanged() {
     const financeIncome = financeGoals.value.find(item => {
-        return item.name === '理財收入'
+        return item.name === '理財&其他收入'
     })
     if (financeIncome) {
         const n = retirement.value.age - profile.value.age
