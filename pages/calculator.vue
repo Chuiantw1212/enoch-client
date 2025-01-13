@@ -240,6 +240,13 @@ const financeGoals = ref([
         ratePerYear: 2,
     },
     {
+        name: '退休前收入',
+        startAge: 0,
+        pmt: 200000,
+        n: 0,
+        ratePerYear: 2,
+    },
+    {
         name: '退休後收入',
         startAge: 0,
         pmt: 300000,
