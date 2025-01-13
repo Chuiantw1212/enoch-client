@@ -76,7 +76,7 @@
             </el-card>
 
             <el-card class="calculator__card calculator__card--100">
-                <el-table :data="financeGoals" style="width: 100%">
+                <el-table :data="financeGoals">
                     <el-table-column prop="name" label="理財目標">
                         <template #default="scope">
                             <el-input :model-value="scope.row.name"
@@ -651,27 +651,40 @@ onMounted(() => {
     font-family: "Noto Sans TC", serif;
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: 11px;
+    // flex-direction: column;
+    justify-content: center;
 
     .calculator__card {
         width: 100%;
     }
 
     .calculator__chart {
-        width: 100%;
+        width: 670px;
     }
 }
 
-@media screen and (min-width:996px) {
-    .calculator__container {
-        .calculator__card {
-            width: calc(50% - 8px);
-        }
-
-        .calculator__card--100 {
-            width: 100%;
-        }
+@media print {
+    @page {
+        size: A4 portrait;
+    }
+    
+    .calculator__card {
+        font-size: 8px;
+        page-break-after: always;
+        // height: 100mm;
+        // width: 8.5in;
     }
 }
-</style>
+
+// @media (min-width:996px) {
+//     .calculator__container {
+//         .calculator__card {
+//             width: calc(50% - 8px);
+//         }
+
+//         .calculator__card--100 {
+//             width: 100%;
+//         }
+//     }
+// }</style>
