@@ -1,9 +1,9 @@
 <template>
     <div class="calculator">
-        <h1 class="calculator__header">
-            速算多目標理財規劃
-        </h1>
         <div class="calculator__container">
+            <h1 class="calculator__header">
+                速算多目標理財規劃
+            </h1>
             <el-card class="calculator__card">
                 <template #header>
                     基本資料
@@ -76,15 +76,15 @@
             </el-card>
 
             <el-card class="calculator__card calculator__card--100">
-                <el-table :data="financeGoals">
-                    <el-table-column prop="name" label="理財目標">
+                <el-table class="card__table" :data="financeGoals">
+                    <el-table-column prop="name" label="理財目標" width="140">
                         <template #default="scope">
                             <el-input :model-value="scope.row.name"
                                 :disabled="['理財&其他收入', '退休前收入', '退休後收入', '退休後支出'].includes(scope.row.name)">
                             </el-input>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="startAge" label="開始年齡">
+                    <el-table-column prop="startAge" label="開始年齡" width="200">
                         <template #default="scope">
                             <el-input-number v-model="scope.row.startAge"
                                 :disabled="['理財&其他收入', '退休前收入', '退休後支出'].includes(scope.row.name)"
@@ -95,13 +95,13 @@
                             </el-input-number>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="pmt" label="現金流">
+                    <el-table-column prop="pmt" label="現金流" width="140">
                         <template #default="scope">
                             <el-input v-model="scope.row.pmt" :step="10000" @change="updateAllCharts()"
                                 :formatter="formatMoney" :parser="parseMoney"></el-input>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="n" label="持續年期">
+                    <el-table-column prop="n" label="持續年期" width="200">
                         <template #default="scope">
                             <el-input-number v-model="scope.row.n"
                                 :disabled="['理財&其他收入', '退休前收入', '退休後收入', '退休後支出', '購房首付'].includes('')"
@@ -112,7 +112,7 @@
                             </el-input-number>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="ratePerYear" label="現金流增長率">
+                    <el-table-column prop="ratePerYear" label="現金流增長率" width="200">
                         <template #default="scope">
                             <el-input-number v-model="scope.row.ratePerYear" @change="updateAllCharts()">
                                 <template #suffix>
@@ -142,7 +142,7 @@
                 </el-row>
             </el-card>
 
-            <el-card>
+            <el-card class="calculator__card calculator__card--100">
                 <template #header>
                     試算結果
                 </template>
@@ -648,32 +648,45 @@ onMounted(() => {
 }
 
 .calculator__container {
+    margin: auto;
+    width: 992px;
     font-family: "Noto Sans TC", serif;
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     gap: 11px;
-    // flex-direction: column;
     justify-content: center;
+    align-items: center;
 
     .calculator__card {
         width: 100%;
+
+        .card__table {
+            margin: auto;
+            width: fit-content;
+        }
     }
 
     .calculator__chart {
-        width: 670px;
+        // width: 670px;
     }
 }
 
 @media print {
     @page {
-        size: A4 portrait;
+        size: landscape;
     }
-    
+
     .calculator__card {
-        font-size: 8px;
+        // font-size: 8px;
         page-break-after: always;
         // height: 100mm;
         // width: 8.5in;
+        width: 670px;
+    }
+
+    .calculator__chart {
+        width: 670px;
     }
 }
 
