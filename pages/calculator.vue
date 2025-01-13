@@ -575,25 +575,6 @@ function formatToolTip(tooltipItems: TooltipItem<any>) {
 
 async function exportAsPdf() {
     print()
-    // const dom: any = document.querySelector(".calculator")
-    // if (dom) {
-    //     const canvas = await html2canvas(dom)
-    //     document.body.appendChild(canvas)
-    // }
-    // html2canvas().then(canvas => {
-    //     document.body.appendChild(canvas)
-    // });
-    // const doc = new jsPDF();
-    // doc.addFileToVFS("NotoSansTC.ttf", NotoSansTC);
-    // doc.addFont("NotoSansTC.ttf", "NotoSansTC", "normal");
-    // doc.setFont("NotoSansTC");
-
-    // doc.html(document.body, {
-    //     callback: function (doc) {
-    //         doc.save();
-    //     },
-    //     windowWidth: 768,
-    // });
 }
 
 function calculateAssetData(payload: { n: number, rate: number, pv: number, cashflows: number[], noNegative?: boolean }) {
@@ -654,7 +635,7 @@ onMounted(() => {
     display: flex;
     flex-wrap: wrap;
     gap: 11px;
-    
+
     .calculator__card {
         page-break-after: always;
         width: 100%;
@@ -671,15 +652,3 @@ onMounted(() => {
         size: landscape;
     }
 }
-
-// @media (min-width:996px) {
-//     .calculator__container {
-//         .calculator__card {
-//             width: calc(50% - 8px);
-//         }
-
-//         .calculator__card--100 {
-//             width: 100%;
-//         }
-//     }
-// }</style>
