@@ -648,17 +648,15 @@ onMounted(() => {
 }
 
 .calculator__container {
+    width: 992px;
     margin: auto;
     font-family: "Noto Sans TC", serif;
     display: flex;
-    // flex-direction: column;
     flex-wrap: wrap;
     gap: 11px;
-    // justify-content: center;
-    // align-items: center;
-    page-break-after: always;
-
+    
     .calculator__card {
+        page-break-after: always;
         width: 100%;
 
         .card__table {
@@ -671,29 +669,6 @@ onMounted(() => {
 @media print {
     @page {
         size: landscape;
-    }
-
-    .calculator__container {
-        margin: auto;
-        width: 992px;
-        font-family: "Noto Sans TC", serif;
-        // display: flex;
-        // flex-direction: column;
-        // flex-wrap: wrap;
-        gap: 11px;
-        // justify-content: center;
-        // align-items: center;
-        page-break-after: always;
-
-        .calculator__card {
-            // width: 100%;
-            page-break-after: always;
-
-            .card__table {
-                margin: auto;
-                width: fit-content;
-            }
-        }
     }
 }
 
