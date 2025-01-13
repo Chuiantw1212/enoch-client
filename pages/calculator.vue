@@ -652,3 +652,4 @@ onMounted(() => {
         size: landscape;
     }
 }
+</style>
