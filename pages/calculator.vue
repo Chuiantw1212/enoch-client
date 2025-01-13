@@ -87,7 +87,8 @@
                     <el-table-column prop="startAge" label="開始年齡">
                         <template #default="scope">
                             <el-input-number v-model="scope.row.startAge"
-                                :disabled="['理財&其他收入', '退休後支出'].includes(scope.row.name)" @change="updateAllCharts()">
+                                :disabled="['理財&其他收入', '退休前收入', '退休後支出'].includes(scope.row.name)"
+                                @change="updateAllCharts()">
                                 <template #suffix>
                                     歲
                                 </template>
