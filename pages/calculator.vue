@@ -113,9 +113,12 @@
                 <el-table :data="financeGoals" style="width: 100%">
                     <el-table-column prop="name" label="理財目標">
                         <template #default="scope">
-                            <el-select v-model="scope.row.name" @change="updateAllCharts()">
+                            <el-input :model-value="scope.row.name"
+                                :disabled="['理財收入', '退休後收入', '退休後支出'].includes(scope.row.name)">
+                            </el-input>
+                            <!-- <el-select v-model="scope.row.name" @change="updateAllCharts()">
                                 <el-option v-for="item in financeGoalNames" :key="item" :label="item" :value="item" />
-                            </el-select>
+                            </el-select> -->
                         </template>
                     </el-table-column>
                     <el-table-column prop="startAge" label="開始年齡">
