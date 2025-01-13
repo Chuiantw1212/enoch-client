@@ -1,6 +1,6 @@
 # 以諾理財規劃顧問
 
-![以諾理財規劃顧問](https://storage.googleapis.com/enoch-259ad_public/enochfp.com_.webp "以諾理財規劃顧問")
+![以諾理財規劃顧問](https://storage.googleapis.com/enoch-259ad_public/%E4%BB%A5%E8%AB%BE%E4%B8%80%E9%A0%81DM.webp "以諾理財規劃顧問")
 
 # 開發指南
 
