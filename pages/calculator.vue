@@ -409,7 +409,6 @@ function drawCashFlowChart() {
                         }
                     },
                     y: {
-                        stacked: true,
                         title: {
                             display: true,
                             text: '現金流'
@@ -623,9 +622,6 @@ onMounted(() => {
 
 .calculator {
     font-family: "Noto Sans TC", serif;
-    display: flex;
-    flex-direction: column;
-    gap: 11px;
     width: 992px;
     margin: auto;
 }
@@ -634,6 +630,7 @@ onMounted(() => {
     .calculator__card {
         page-break-after: always;
         width: 100%;
+        margin-bottom: 11px;
 
         .card__table {
             margin: auto;
@@ -644,7 +641,7 @@ onMounted(() => {
 
 @media print {
     @page {
-        size: landscape;
+        size: A4 landscape;
     }
 }
 </style>
