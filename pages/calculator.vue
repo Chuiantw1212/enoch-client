@@ -55,14 +55,14 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="現有資產">
-                            <el-input v-model="security.presentValue" :min="0" :step="100000" @click="onAssetChanged()"
+                            <el-input v-model="security.presentValue" :min="0" :step="100000" @change="onAssetChanged()"
                                 :formatter="formatMoney" :parser="parseMoney"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="投資報酬率">
                             <el-input-number v-model="security.presentIrr" :min="0" :max="100" :step="0.1"
-                                @click="onAssetChanged()">
+                                @change="onAssetChanged()">
                                 <template #suffix>
                                     %
                                 </template>
@@ -478,7 +478,7 @@ function drawAssetChart() {
     })
 
     // 暴力破解避免暫時性的負資產
-    if (Math.abs(expectedIrr) === Infinity) {
+    if (Math.abs(expectedIrr) === Infinity || isNaN(expectedIrr)) {
         security.value.expectedIrr = 0
         requiredReturnData = calculateAssetData({
             n: lifeExpectancy - profile.value.age,
