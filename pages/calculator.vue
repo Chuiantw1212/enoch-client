@@ -409,7 +409,6 @@ function drawCashFlowChart() {
                         }
                     },
                     y: {
-                        stacked: true,
                         title: {
                             display: true,
                             text: '現金流'
