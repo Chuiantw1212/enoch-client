@@ -1,165 +1,162 @@
 <template>
     <div class="calculator">
-        <div class="calculator__container">
-            <h1 class="calculator__header">
-                速算多目標理財規劃
-            </h1>
-            <el-card class="calculator__card">
-                <template #header>
-                    基本資料
-                </template>
-                <el-form>
-                    <el-row>
-                        <el-col :span="12">
-                            <el-form-item label="目前年齡">
-                                <el-input-number v-model="profile.age" :min="0" :max="120" Ｆ
-                                    @change="onProfileChanged()">
-                                    <template #suffix>
-                                        歲
-                                    </template>
-                                </el-input-number>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="12">
-                            <el-form-item label="無風險利率">
-                                <el-input-number v-model="config.riskFreeRatePerYear" :min="0" :max="100" :step="0.125">
-                                    <template #suffix>
-                                        %
-                                    </template>
-                                </el-input-number>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-divider content-position="left">退休</el-divider>
-                    <el-row>
-                        <el-col :span="12">
-                            <el-form-item label="預計退休">
-                                <el-input-number v-model="retirement.age" :min="50" :max="70" Ｆ
-                                    @change="onReqirementChanged()">
-                                    <template #suffix>
-                                        歲
-                                    </template>
-                                </el-input-number>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="12">
-                            <el-form-item label="退休後餘命">
-                                <el-input-number v-model="retirement.lifeExpectancy" :min="0" :max="120" Ｆ
-                                    @change="onReqirementChanged()">
-                                    <template #suffix>
-                                        年
-                                    </template>
-                                </el-input-number>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-divider content-position="left">生息資產</el-divider>
-                    <el-row :gutter="20">
-                        <el-col :span="12">
-                            <el-form-item label="現有資產">
-                                <el-input v-model="security.presentValue" :min="0" :step="100000"
-                                    @click="onAssetChanged()" :formatter="formatMoney" :parser="parseMoney"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="12">
-                            <el-form-item label="投資報酬率">
-                                <el-input-number v-model="security.presentIrr" :min="0" :max="100" :step="0.1"
-                                    @click="onAssetChanged()">
-                                    <template #suffix>
-                                        %
-                                    </template>
-                                </el-input-number>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </el-form>
-            </el-card>
-
-            <el-card class="calculator__card calculator__card--100">
-                <el-table class="card__table" :data="financeGoals">
-                    <el-table-column prop="name" label="理財目標" width="140">
-                        <template #default="scope">
-                            <el-input :model-value="scope.row.name"
-                                :disabled="['理財&其他收入', '退休前收入', '退休後收入', '退休後支出'].includes(scope.row.name)">
-                            </el-input>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="startAge" label="開始年齡" width="200">
-                        <template #default="scope">
-                            <el-input-number v-model="scope.row.startAge"
-                                :disabled="['理財&其他收入', '退休前收入', '退休後支出'].includes(scope.row.name)"
-                                @change="updateAllCharts()">
+        <h1 class="calculator__header">
+            速算多目標理財規劃
+        </h1>
+        <el-card class="calculator__card">
+            <template #header>
+                基本資料
+            </template>
+            <el-form>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="目前年齡">
+                            <el-input-number v-model="profile.age" :min="0" :max="120" Ｆ @change="onProfileChanged()">
                                 <template #suffix>
                                     歲
                                 </template>
                             </el-input-number>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="pmt" label="現金流" width="140">
-                        <template #default="scope">
-                            <el-input v-model="scope.row.pmt" :step="10000" @change="updateAllCharts()"
-                                :formatter="formatMoney" :parser="parseMoney"></el-input>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="n" label="持續年期" width="200">
-                        <template #default="scope">
-                            <el-input-number v-model="scope.row.n"
-                                :disabled="['理財&其他收入', '退休前收入', '退休後收入', '退休後支出', '購房首付'].includes('')"
-                                @change="updateAllCharts()">
-                                <template #suffix>
-                                    年
-                                </template>
-                            </el-input-number>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="ratePerYear" label="現金流增長率" width="200">
-                        <template #default="scope">
-                            <el-input-number v-model="scope.row.ratePerYear" @change="updateAllCharts()">
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="無風險利率">
+                            <el-input-number v-model="config.riskFreeRatePerYear" :min="0" :max="100" :step="0.125">
                                 <template #suffix>
                                     %
                                 </template>
                             </el-input-number>
-                        </template>
-                    </el-table-column>
-                </el-table>
-            </el-card>
-
-            <el-card class="calculator__card calculator__card--100">
-                <template #header>
-                    現金流量表
-                </template>
-                <el-row justify="center">
-                    <canvas class="calculator__chart" id="cashFlowChart"></canvas>
+                        </el-form-item>
+                    </el-col>
                 </el-row>
-            </el-card>
-
-            <el-card class="calculator__card calculator__card--100">
-                <template #header>
-                    不同報酬率 / 資產變化比較表
-                </template>
-                <el-row justify="center">
-                    <canvas class="calculator__chart" id="assetChart"></canvas>
+                <el-divider content-position="left">退休</el-divider>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="預計退休">
+                            <el-input-number v-model="retirement.age" :min="50" :max="70" Ｆ
+                                @change="onReqirementChanged()">
+                                <template #suffix>
+                                    歲
+                                </template>
+                            </el-input-number>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="退休後餘命">
+                            <el-input-number v-model="retirement.lifeExpectancy" :min="0" :max="120" Ｆ
+                                @change="onReqirementChanged()">
+                                <template #suffix>
+                                    年
+                                </template>
+                            </el-input-number>
+                        </el-form-item>
+                    </el-col>
                 </el-row>
-            </el-card>
+                <el-divider content-position="left">生息資產</el-divider>
+                <el-row :gutter="20">
+                    <el-col :span="12">
+                        <el-form-item label="現有資產">
+                            <el-input v-model="security.presentValue" :min="0" :step="100000" @change="onAssetChanged()"
+                                :formatter="formatMoney" :parser="parseMoney"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="投資報酬率">
+                            <el-input-number v-model="security.presentIrr" :min="0" :max="100" :step="0.1"
+                                @change="onAssetChanged()">
+                                <template #suffix>
+                                    %
+                                </template>
+                            </el-input-number>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </el-form>
+        </el-card>
 
-            <el-card class="calculator__card calculator__card--100">
-                <template #header>
-                    試算結果
-                </template>
-                <el-form-item label="所需報酬率">
-                    <el-input-number v-model="security.expectedIrr" :disabled="true">
-                        <template #suffix>
-                            %
-                        </template>
-                    </el-input-number>
-                </el-form-item>
-                <template #footer>
-                    <el-button @click="exportAsPdf()">
-                        匯出
-                    </el-button>
-                </template>
-            </el-card>
-        </div>
+        <el-card class="calculator__card calculator__card--100">
+            <el-table class="card__table" :data="financeGoals">
+                <el-table-column prop="name" label="理財目標" width="140">
+                    <template #default="scope">
+                        <el-input :model-value="scope.row.name"
+                            :disabled="['理財&其他收入', '退休前收入', '退休後收入', '退休後支出'].includes(scope.row.name)">
+                        </el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="startAge" label="開始年齡" width="200">
+                    <template #default="scope">
+                        <el-input-number v-model="scope.row.startAge"
+                            :disabled="['理財&其他收入', '退休前收入', '退休後支出'].includes(scope.row.name)"
+                            @change="updateAllCharts()">
+                            <template #suffix>
+                                歲
+                            </template>
+                        </el-input-number>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="pmt" label="現金流" width="140">
+                    <template #default="scope">
+                        <el-input v-model="scope.row.pmt" :step="10000" @change="updateAllCharts()"
+                            :formatter="formatMoney" :parser="parseMoney"></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="n" label="持續年期" width="200">
+                    <template #default="scope">
+                        <el-input-number v-model="scope.row.n"
+                            :disabled="['理財&其他收入', '退休前收入', '退休後收入', '退休後支出', '購房首付'].includes('')"
+                            @change="updateAllCharts()">
+                            <template #suffix>
+                                年
+                            </template>
+                        </el-input-number>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="ratePerYear" label="現金流增長率" width="200">
+                    <template #default="scope">
+                        <el-input-number v-model="scope.row.ratePerYear" @change="updateAllCharts()">
+                            <template #suffix>
+                                %
+                            </template>
+                        </el-input-number>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-card>
+
+        <el-card class="calculator__card calculator__card--100">
+            <template #header>
+                現金流量表
+            </template>
+            <el-row justify="center">
+                <canvas class="calculator__chart" id="cashFlowChart"></canvas>
+            </el-row>
+        </el-card>
+
+        <el-card class="calculator__card calculator__card--100">
+            <template #header>
+                不同報酬率 / 資產變化比較表
+            </template>
+            <el-row justify="center">
+                <canvas class="calculator__chart" id="assetChart"></canvas>
+            </el-row>
+        </el-card>
+
+        <el-card class="calculator__card calculator__card--100">
+            <template #header>
+                試算結果
+            </template>
+            <el-form-item label="所需報酬率">
+                <el-input-number v-model="security.expectedIrr" :disabled="true">
+                    <template #suffix>
+                        %
+                    </template>
+                </el-input-number>
+            </el-form-item>
+            <template #footer>
+                <el-button @click="exportAsPdf()">
+                    匯出
+                </el-button>
+            </template>
+        </el-card>
     </div>
 </template>
 <script lang="ts" setup>
@@ -481,7 +478,7 @@ function drawAssetChart() {
     })
 
     // 暴力破解避免暫時性的負資產
-    if (Math.abs(expectedIrr) === Infinity) {
+    if (Math.abs(expectedIrr) === Infinity || isNaN(expectedIrr)) {
         security.value.expectedIrr = 0
         requiredReturnData = calculateAssetData({
             n: lifeExpectancy - profile.value.age,
@@ -624,18 +621,16 @@ onMounted(() => {
 <style lang="scss" scoped>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap');
 
-.calculator__header {
-    font-family: "Noto Sans TC", serif;
-}
-
-.calculator__container {
-    width: 992px;
-    margin: auto;
+.calculator {
     font-family: "Noto Sans TC", serif;
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 11px;
+    width: 992px;
+    margin: auto;
+}
 
+.calculator {
     .calculator__card {
         page-break-after: always;
         width: 100%;
