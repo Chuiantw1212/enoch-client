@@ -77,8 +77,9 @@
             <el-table class="card__table" :data="financeGoals">
                 <el-table-column prop="name" label="理財目標" width="140">
                     <template #default="scope">
-                        <el-input :model-value="scope.row.name"
-                            :disabled="['理財&其他收入', '退休前收入', '退休後收入', '退休後支出'].includes(scope.row.name)">
+                        <el-input v-model="scope.row.name"
+                            :disabled="['理財&其他收入', '退休前收入', '退休後收入', '退休後支出'].includes(scope.row.name)"
+                            placeholder="請輸入" @change="updateAllCharts()">
                         </el-input>
                     </template>
                 </el-table-column>
