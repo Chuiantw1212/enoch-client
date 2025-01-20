@@ -78,7 +78,7 @@
                 <el-table-column prop="name" label="理財目標" width="140">
                     <template #default="scope">
                         <el-input v-model="scope.row.name"
-                            :disabled="['理財&其他收入', '退休前收入', '退休後收入', '退休後支出'].includes(scope.row.name)"
+                            :disabled="['理財&其他收入', '退休前收入', '退休後收入', '生活支出'].includes(scope.row.name)"
                             placeholder="請輸入" @change="updateAllCharts()">
                         </el-input>
                     </template>
@@ -86,7 +86,7 @@
                 <el-table-column prop="startAge" label="開始年齡" width="200">
                     <template #default="scope">
                         <el-input-number v-model="scope.row.startAge"
-                            :disabled="['理財&其他收入', '退休前收入', '退休後支出'].includes(scope.row.name)"
+                            :disabled="['理財&其他收入', '退休前收入', '生活支出'].includes(scope.row.name)"
                             @change="updateAllCharts()">
                             <template #suffix>
                                 歲
@@ -103,7 +103,7 @@
                 <el-table-column prop="n" label="持續年期" width="200">
                     <template #default="scope">
                         <el-input-number v-model="scope.row.n"
-                            :disabled="['理財&其他收入', '退休前收入', '退休後收入', '退休後支出', '購房首付'].includes('')"
+                            :disabled="['理財&其他收入', '退休前收入', '退休後收入', '生活支出', '購房首付'].includes('')"
                             @change="updateAllCharts()">
                             <template #suffix>
                                 年
@@ -218,7 +218,7 @@ const financeGoals = ref([
     },
     // 流出
     {
-        name: '退休後支出',
+        name: '生活支出',
         startAge: 0,
         pmt: -360000,
         n: 0,
@@ -291,10 +291,10 @@ function onReqirementChanged() {
     }
 
     const retirementExpense = financeGoals.value.find(item => {
-        return item.name === '退休後支出'
+        return item.name === '生活支出'
     })
     if (retirementExpense) {
-        retirementExpense.startAge = retirement.value.age
+        retirementExpense.startAge = profile.value.age
         retirementExpense.n = retirement.value.lifeExpectancy
     }
 }
