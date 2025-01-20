@@ -20,7 +20,8 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="無風險利率">
-                            <el-input-number v-model="config.riskFreeRatePerYear" :min="0" :max="100" :step="0.125">
+                            <el-input-number v-model="config.riskFreeRatePerYear" :min="0" :max="100" :step="0.125"
+                                @change="updateAllCharts()">
                                 <template #suffix>
                                     %
                                 </template>
@@ -78,8 +79,8 @@
                 <el-table-column prop="name" label="理財目標" width="140">
                     <template #default="scope">
                         <el-input v-model="scope.row.name"
-                            :disabled="['理財&其他收入', '退休前收入', '退休後收入', '生活支出'].includes(scope.row.name)"
-                            placeholder="請輸入" @change="updateAllCharts()">
+                            :disabled="['理財&其他收入', '退休前收入', '退休後收入', '生活支出'].includes(scope.row.name)" placeholder="請輸入"
+                            @change="updateAllCharts()">
                         </el-input>
                     </template>
                 </el-table-column>
