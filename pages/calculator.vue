@@ -79,15 +79,15 @@
                 <el-table-column prop="name" label="理財目標" width="140">
                     <template #default="scope">
                         <el-input v-model="scope.row.name"
-                            :disabled="['理財&其他收入', '退休前收入', '退休後收入', '生活支出'].includes(scope.row.name)" placeholder="請輸入"
-                            @change="updateAllCharts()">
+                            :disabled="['理財&其他收入', '在職期間收入', '在職期間支出', '退休後收入', '退休後支出'].includes(scope.row.name)"
+                            placeholder="請輸入" @change="updateAllCharts()">
                         </el-input>
                     </template>
                 </el-table-column>
                 <el-table-column prop="startAge" label="開始年齡" width="200">
                     <template #default="scope">
                         <el-input-number v-model="scope.row.startAge"
-                            :disabled="['理財&其他收入', '退休前收入', '生活支出'].includes(scope.row.name)"
+                            :disabled="['理財&其他收入', '在職期間收入', '在職期間支出', '退休後收入', '退休後支出'].includes(scope.row.name)"
                             @change="updateAllCharts()">
                             <template #suffix>
                                 歲
@@ -104,7 +104,7 @@
                 <el-table-column prop="n" label="持續年期" width="200">
                     <template #default="scope">
                         <el-input-number v-model="scope.row.n"
-                            :disabled="['理財&其他收入', '退休前收入', '退休後收入', '生活支出', '購房首付'].includes('')"
+                            :disabled="['理財&其他收入', '在職期間收入', '退休後收入', '退休後支出', '購房首付'].includes('')"
                             @change="updateAllCharts()">
                             <template #suffix>
                                 年
@@ -204,9 +204,16 @@ const financeGoals = ref([
         ratePerYear: 2,
     },
     {
-        name: '退休前收入',
+        name: '在職期間收入',
         startAge: 0,
         pmt: 200000,
+        n: 0,
+        ratePerYear: 2,
+    },
+    {
+        name: '在職期間支出',
+        startAge: 0,
+        pmt: -360000,
         n: 0,
         ratePerYear: 2,
     },
@@ -219,7 +226,7 @@ const financeGoals = ref([
     },
     // 流出
     {
-        name: '生活支出',
+        name: '退休後支出',
         startAge: 0,
         pmt: -360000,
         n: 0,
@@ -265,12 +272,19 @@ function onProfileChanged() {
     }
 
     const careerIncome = financeGoals.value.find(item => {
-        return item.name === '退休前收入'
+        return item.name === '在職期間收入'
     })
-
     if (careerIncome) {
         careerIncome.startAge = profile.value.age
         careerIncome.n = workingPeriod
+    }
+
+    const careerExpense = financeGoals.value.find(item => {
+        return item.name === '在職期間支出'
+    })
+    if (careerExpense) {
+        careerExpense.startAge = profile.value.age
+        careerExpense.n = workingPeriod
     }
 
     debouncedrawAssetChart()
@@ -292,10 +306,10 @@ function onReqirementChanged() {
     }
 
     const retirementExpense = financeGoals.value.find(item => {
-        return item.name === '生活支出'
+        return item.name === '退休後支出'
     })
     if (retirementExpense) {
-        retirementExpense.startAge = profile.value.age
+        retirementExpense.startAge = retirement.value.age
         retirementExpense.n = retirement.value.lifeExpectancy
     }
 }
