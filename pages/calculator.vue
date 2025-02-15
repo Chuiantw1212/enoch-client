@@ -287,8 +287,7 @@ function onProfileChanged() {
         careerExpense.n = workingPeriod
     }
 
-    debouncedrawAssetChart()
-    drawCashFlowChart()
+    updateAllCharts()
 }
 
 function onReqirementChanged() {
@@ -312,29 +311,18 @@ function onReqirementChanged() {
         retirementExpense.startAge = retirement.value.age
         retirementExpense.n = retirement.value.lifeExpectancy
     }
+    updateAllCharts()
 }
 
 function onAssetChanged() {
-    drawAssetChart()
+    updateAllCharts()
 }
 
-function onEstateChanged() {
-    // const date = new Date()
-    // let currentYear = date.getFullYear()
-    // currentYear += 3
-    // date.setFullYear(currentYear)
-
-    // const estateMortgage = financeGoals.value.find(item => {
-    //     return item.name === '購房首付'
-    // })
-    // if (estateMortgage) {
-
-    // }
-}
-
-function updateAllCharts() {
-    drawAssetChart()
-    drawCashFlowChart()
+async function updateAllCharts() {
+    setTimeout(async () => {
+        await drawCashFlowChart()
+        await drawAssetChart()
+    })
 }
 
 
@@ -351,7 +339,7 @@ function drawCashFlowChart() {
             const simAge = i + profile.value.age
             labels[i] = `${simAge}歲`
             const isStarted = simAge >= item.startAge
-            const isEnded = simAge > item.startAge + item.n - 1
+            const isEnded = simAge >= item.startAge + Number(item.n)
             if (isStarted && !isEnded) {
                 let itemRatePerYear = 1 + item.ratePerYear / 100
                 itemRatePerYear = Math.pow(itemRatePerYear, i)
@@ -439,10 +427,6 @@ function drawCashFlowChart() {
 
 let assetChartRef = ref<Chart>()
 
-function debouncedrawAssetChart() {
-    drawAssetChart()
-}
-
 function drawAssetChart() {
     let canvas = null
     if (assetChartRef.value) {
@@ -461,7 +445,7 @@ function drawAssetChart() {
     const riskFreeData: number[] = calculateAssetData({
         n: n,
         rate: riskFreeRatePerYear / 100,
-        pv: security.value.presentValue,
+        pv: Number(security.value.presentValue),
         cashflows: netCashflows.value
     })
 
@@ -469,52 +453,51 @@ function drawAssetChart() {
     const currentReturnData: number[] = calculateAssetData({
         n: lifeExpectancy - profile.value.age,
         rate: security.value.presentIrr / 100,
-        pv: security.value.presentValue,
+        pv: Number(security.value.presentValue),
         cashflows: netCashflows.value
     })
 
 
     /** 理想投資報酬率 */
     // 計算每期淨現金流
-    const completeCashflows = [security.value.presentValue, ...netCashflows.value]
+    const completeCashflows = [Number(security.value.presentValue), ...netCashflows.value]
     let initialCashflows = completeCashflows
     let expectedIrr: number = irr(initialCashflows)
     expectedIrr = Math.round(expectedIrr * 1000) / 1000;
 
+    if (isNaN(expectedIrr)) {
+        // 完全不夠
+        expectedIrr = 0
+    }
+    if (Math.abs(expectedIrr) === Infinity) {
+        // 完全夠
+        expectedIrr = 0
+    }
 
     // 暴力破解期望IRR
     let requiredReturnData: number[] = []
     requiredReturnData = calculateAssetData({
         n: lifeExpectancy - profile.value.age,
         rate: expectedIrr,
-        pv: security.value.presentValue,
+        pv: Number(security.value.presentValue),
         cashflows: netCashflows.value,
         noNegative: true,
     })
 
     // 暴力破解避免暫時性的負資產
-    if (Math.abs(expectedIrr) === Infinity || isNaN(expectedIrr)) {
-        security.value.expectedIrr = 0
-        requiredReturnData = calculateAssetData({
-            n: lifeExpectancy - profile.value.age,
-            rate: 0,
-            pv: security.value.presentValue,
-            cashflows: netCashflows.value,
-        })
-    } else {
+    if (!isNaN(expectedIrr) && Math.abs(expectedIrr) !== Infinity) {
         while (requiredReturnData.length < n - 1) {
             expectedIrr += 0.001
             requiredReturnData = calculateAssetData({
                 n: lifeExpectancy - profile.value.age,
                 rate: expectedIrr,
-                pv: security.value.presentValue,
+                pv: Number(security.value.presentValue),
                 cashflows: netCashflows.value,
                 noNegative: true,
             })
         }
-        security.value.expectedIrr = expectedIrr * 100
     }
-
+    security.value.expectedIrr = Number(Number(expectedIrr * 100).toFixed(2))
 
     // 資料集
     const datasets = [
@@ -595,7 +578,7 @@ function calculateAssetData(payload: { n: number, rate: number, pv: number, cash
     const cashflows = payload.cashflows
     const data = []
     const noNegative = payload.noNegative ?? false
-    let pv = payload.pv
+    let pv = Number(payload.pv)
     let fv = 0
     for (let i = 0; i < n; i++) {
         // 計算pv
@@ -628,7 +611,6 @@ onMounted(() => {
     }
     onProfileChanged()
     onReqirementChanged()
-    onEstateChanged()
     updateAllCharts()
 })
 
