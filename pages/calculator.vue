@@ -333,8 +333,8 @@ function onEstateChanged() {
 }
 
 function updateAllCharts() {
-    drawCashFlowChart()
     drawAssetChart()
+    drawCashFlowChart()
 }
 
 
