@@ -7,7 +7,6 @@
     "dev": "nuxt dev",
     "build": "nuxt build",
     "postbuild": "cd .output/server && pnpm add @google-cloud/functions-framework",
-    "predeploy": "pnpm run build",
     "deploy": "firebase use enoch-259ad && firebase deploy"
   },
   "dependencies": {
