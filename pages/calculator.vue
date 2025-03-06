@@ -446,7 +446,7 @@ function drawAssetChart() {
         n: n,
         rate: riskFreeRatePerYear / 100,
         pv: Number(security.value.presentValue),
-        cashflows: netCashflows.value
+        cashflows: netCashflows.value,
         noNegative: true,
     })
 
@@ -455,7 +455,7 @@ function drawAssetChart() {
         n: lifeExpectancy - profile.value.age,
         rate: security.value.presentIrr / 100,
         pv: Number(security.value.presentValue),
-        cashflows: netCashflows.value
+        cashflows: netCashflows.value,
         noNegative: true,
     })
 
