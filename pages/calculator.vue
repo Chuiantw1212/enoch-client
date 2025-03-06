@@ -447,6 +447,7 @@ function drawAssetChart() {
         rate: riskFreeRatePerYear / 100,
         pv: Number(security.value.presentValue),
         cashflows: netCashflows.value
+        noNegative: true,
     })
 
     // 目前投資報酬率
@@ -455,6 +456,7 @@ function drawAssetChart() {
         rate: security.value.presentIrr / 100,
         pv: Number(security.value.presentValue),
         cashflows: netCashflows.value
+        noNegative: true,
     })
 
 
